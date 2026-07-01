@@ -1,0 +1,14 @@
+{
+  "name": "graduate-jobs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Feishu-synced graduate job board.",
+  "scripts": {
+    "build": "node scripts/sync-feishu-jobs.js",
+    "sync": "node scripts/sync-feishu-jobs.js",
+    "inspect:feishu": "node scripts/inspect-feishu-fields.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
