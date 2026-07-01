@@ -96,12 +96,31 @@ async function main() {
 
   fs.mkdirSync(path.dirname(config.output), { recursive: true });
   fs.writeFileSync(config.output, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  ensureIndexHtml();
 
   console.log(`Synced ${jobs.length} jobs from ${records.length} records.`);
   console.log(`Output: ${config.output}`);
   if (skipped.length) {
     console.log(`Skipped ${skipped.length} records. See "skipped" in the output JSON.`);
   }
+}
+
+function ensureIndexHtml() {
+  const outputDir = path.dirname(config.output);
+  const target = path.join(outputDir, "index.html");
+  const candidates = [
+    path.join(outputDir, "graduate-jobs.html"),
+    path.join(ROOT, "graduate-jobs.html")
+  ];
+  const source = candidates.find((candidate) => fs.existsSync(candidate));
+
+  if (!source) {
+    console.warn("No HTML entry file found. Expected outputs/graduate-jobs.html or graduate-jobs.html.");
+    return;
+  }
+
+  fs.copyFileSync(source, target);
+  console.log(`HTML entry: ${target}`);
 }
 
 function loadDotEnv(filePath) {
