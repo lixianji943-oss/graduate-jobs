@@ -249,7 +249,7 @@
 
     .filters {
       display: grid;
-      grid-template-columns: 1.4fr repeat(4, minmax(130px, 1fr));
+      grid-template-columns: 1.4fr repeat(5, minmax(120px, 1fr));
       gap: 10px;
       align-items: end;
       margin-bottom: 14px;
@@ -602,6 +602,59 @@
       gap: 10px;
     }
 
+    .profile-help {
+      border: 1px dashed rgba(16, 16, 16, 0.2);
+      border-radius: var(--radius);
+      padding: 12px;
+      color: #564b3e;
+      background: rgba(244, 216, 95, 0.16);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    .file-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: 110px repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .score-card,
+    .analysis-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: #fffdf8;
+    }
+
+    .score-card strong {
+      display: block;
+      color: var(--green);
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .analysis-box h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .analysis-box ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #4f483e;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
     .summary-item {
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -867,7 +920,8 @@
       }
 
       .dashboard-grid,
-      .stats-grid {
+      .stats-grid,
+      .analysis-grid {
         grid-template-columns: 1fr 1fr;
       }
     }
@@ -892,7 +946,9 @@
       .profile-grid,
       .profile-summary,
       .dashboard-grid,
-      .stats-grid {
+      .stats-grid,
+      .analysis-grid,
+      .file-row {
         grid-template-columns: 1fr;
       }
 
@@ -1051,6 +1107,21 @@
               </div>
             </div>
             <div class="field full">
+              <label for="profileSkills">技能 / 证书</label>
+              <textarea id="profileSkills" placeholder="例如：Python、SQL、Excel、CET-6、教师资格证、证券从业资格"></textarea>
+            </div>
+            <div class="field full">
+              <label for="resumeFile">上传简历（.docx / .pdf，可尝试自动识别填充）</label>
+              <div class="file-row">
+                <input id="resumeFile" type="file" accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                <span class="muted" id="resumeStatus">未上传</span>
+              </div>
+            </div>
+            <div class="field full">
+              <label for="resumeText">简历文本识别结果 / 手动粘贴区</label>
+              <textarea id="resumeText" placeholder="如果文件识别失败，可以把简历文字粘贴在这里，再点击保存信息。"></textarea>
+            </div>
+            <div class="field full">
               <label for="profileCampus">校园经历</label>
               <textarea id="profileCampus"></textarea>
             </div>
@@ -1058,7 +1129,21 @@
               <label for="profileExperience">实习 / 项目 / 工作经验</label>
               <textarea id="profileExperience"></textarea>
             </div>
+            <div class="field full">
+              <label for="profilePortfolio">作品集 / 项目链接</label>
+              <textarea id="profilePortfolio" placeholder="例如：作品集链接、GitHub、个人网站、项目说明、论文/竞赛成果链接"></textarea>
+            </div>
           </div>
+          <div class="profile-help" style="margin-top: 14px;">
+            匹配度依据：意向岗位、学历、专业、技能/证书、校园经历、实习/项目经历与岗位名称、岗位类型、专业要求、任职要求之间的关键词匹配；结果用于求职参考，不代表企业真实筛选结论。
+          </div>
+        </section>
+        <section class="panel" style="margin-top: 16px;">
+          <div class="panel-head">
+            <h3>个人匹配画像</h3>
+            <button class="btn" data-nav-jump="jobs" type="button">查看匹配岗位</button>
+          </div>
+          <div id="profileAnalysis" class="analysis-grid"></div>
         </section>
       </section>
 
@@ -1076,6 +1161,19 @@
             <div class="field">
               <label for="nature">企业性质</label>
               <select id="nature"><option value="">全部</option></select>
+            </div>
+            <div class="field">
+              <label for="jobType">岗位类型</label>
+              <select id="jobType">
+                <option value="">全部</option>
+                <option value="实习">实习</option>
+                <option value="日常实习">日常实习</option>
+                <option value="暑期实习">暑期实习</option>
+                <option value="正职">正职</option>
+                <option value="提前批">提前批</option>
+                <option value="正式批">正式批</option>
+                <option value="补录">补录</option>
+              </select>
             </div>
             <div class="field">
               <label for="degree">学历要求</label>
@@ -1163,6 +1261,10 @@
       </header>
       <div class="modal-body">
         <div class="detail-grid" id="modalDetails"></div>
+        <section class="section">
+          <h3>个人匹配分析</h3>
+          <div id="modalMatch" class="analysis-grid"></div>
+        </section>
         <section class="section">
           <h3>岗位职责</h3>
           <ul id="modalResponsibilities"></ul>
@@ -1284,6 +1386,7 @@
       keyword: document.querySelector("#keyword"),
       city: document.querySelector("#city"),
       nature: document.querySelector("#nature"),
+      jobType: document.querySelector("#jobType"),
       degree: document.querySelector("#degree"),
       status: document.querySelector("#status"),
       resultCount: document.querySelector("#resultCount"),
@@ -1303,8 +1406,14 @@
       profileMajor: document.querySelector("#profileMajor"),
       intentChips: document.querySelector("#intentChips"),
       intentInput: document.querySelector("#intentInput"),
+      profileSkills: document.querySelector("#profileSkills"),
+      resumeFile: document.querySelector("#resumeFile"),
+      resumeStatus: document.querySelector("#resumeStatus"),
+      resumeText: document.querySelector("#resumeText"),
       profileCampus: document.querySelector("#profileCampus"),
       profileExperience: document.querySelector("#profileExperience"),
+      profilePortfolio: document.querySelector("#profilePortfolio"),
+      profileAnalysis: document.querySelector("#profileAnalysis"),
       saveProfile: document.querySelector("#saveProfile"),
       recommendFromProfile: document.querySelector("#recommendFromProfile"),
       clearProfile: document.querySelector("#clearProfile"),
@@ -1317,6 +1426,7 @@
       modalDetails: document.querySelector("#modalDetails"),
       modalResponsibilities: document.querySelector("#modalResponsibilities"),
       modalRequirements: document.querySelector("#modalRequirements"),
+      modalMatch: document.querySelector("#modalMatch"),
       modalSalary: document.querySelector("#modalSalary"),
       modalSource: document.querySelector("#modalSource"),
       modalFavorite: document.querySelector("#modalFavorite"),
@@ -1363,7 +1473,7 @@
         button.addEventListener("click", () => switchView(button.dataset.navJump));
       });
 
-      [els.keyword, els.city, els.nature, els.degree, els.status].forEach((item) => {
+      [els.keyword, els.city, els.nature, els.jobType, els.degree, els.status].forEach((item) => {
         item.addEventListener("input", renderJobs);
         item.addEventListener("change", renderJobs);
       });
@@ -1381,6 +1491,8 @@
         }
       });
       els.intentInput.addEventListener("blur", () => addIntent(els.intentInput.value));
+      els.resumeFile.addEventListener("change", handleResumeUpload);
+      els.resumeText.addEventListener("blur", () => applyResumeText(els.resumeText.value, false));
       els.saveProfile.addEventListener("click", saveProfileFromForm);
       els.recommendFromProfile.addEventListener("click", () => {
         saveProfileFromForm("jobs");
@@ -1463,6 +1575,7 @@
       renderJobs();
       renderSavedLists();
       renderHomeRecommended();
+      renderProfileAnalysis();
     }
 
     function renderDailyEncouragement() {
@@ -1488,6 +1601,7 @@
         ["专业", profile.major || "未填写"],
         ["学历", profile.degree || "未填写"],
         ["毕业年份", profile.graduation || "未填写"],
+        ["技能/证书", profile.skills ? "已填写" : "未填写"],
         ["意向岗位", (profile.intents || []).join("、") || "未填写"],
         ["经历", profile.experience ? "已填写" : "未填写"]
       ];
@@ -1505,6 +1619,16 @@
         ? list.map((job) => miniJobCard(job)).join("")
         : `<div class="empty">填写个人信息里的意向岗位后，这里会出现推荐岗位。</div>`;
       bindMiniCards(els.homeRecommended);
+    }
+
+    function renderProfileAnalysis() {
+      const best = getRecommendedJobs(jobs)[0] || jobs[0];
+      if (!best) {
+        els.profileAnalysis.innerHTML = `<div class="empty">暂无可分析岗位。</div>`;
+        return;
+      }
+      const analysis = analyzeJobMatch(best);
+      els.profileAnalysis.innerHTML = matchAnalysisHtml(analysis);
     }
 
     function renderJobs() {
@@ -1581,6 +1705,7 @@
 
       if (keyword && !searchable.includes(keyword)) return false;
       if (!matchesCity(job, els.city.value)) return false;
+      if (!matchesJobType(job, els.jobType.value)) return false;
       if (!matchesDegree(job, els.degree.value)) return false;
       if (els.nature.value && job.nature !== els.nature.value) return false;
       if (els.status.value && job.status !== els.status.value) return false;
@@ -1669,6 +1794,7 @@
           <strong>${escapeHtml(value)}</strong>
         </div>
       `).join("");
+      els.modalMatch.innerHTML = matchAnalysisHtml(analyzeJobMatch(job));
       setList(els.modalResponsibilities, job.responsibilities);
       setList(els.modalRequirements, job.requirements);
       els.modalSalary.textContent = job.salary;
@@ -1691,6 +1817,7 @@
       els.keyword.value = "";
       els.city.value = "";
       els.nature.value = "";
+      els.jobType.value = "";
       els.degree.value = "";
       els.status.value = "";
       showingRecommended = false;
@@ -1765,8 +1892,12 @@
       els.profileDegree.value = profile.degree || "";
       els.profileSchool.value = profile.school || "";
       els.profileMajor.value = profile.major || "";
+      els.profileSkills.value = profile.skills || "";
+      els.resumeText.value = profile.resumeText || "";
+      els.resumeStatus.textContent = profile.resumeFileName ? `已上传：${profile.resumeFileName}` : "未上传";
       els.profileCampus.value = profile.campus || "";
       els.profileExperience.value = profile.experience || "";
+      els.profilePortfolio.value = profile.portfolio || "";
     }
 
     function saveProfileFromForm(nextView = "home") {
@@ -1779,8 +1910,12 @@
         school: els.profileSchool.value.trim(),
         major: els.profileMajor.value.trim(),
         intents: profile.intents || [],
+        skills: els.profileSkills.value.trim(),
+        resumeText: els.resumeText.value.trim(),
+        resumeFileName: profile.resumeFileName || "",
         campus: els.profileCampus.value.trim(),
-        experience: els.profileExperience.value.trim()
+        experience: els.profileExperience.value.trim(),
+        portfolio: els.profilePortfolio.value.trim()
       };
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
       renderAll();
@@ -1825,14 +1960,119 @@
       });
     }
 
+    async function handleResumeUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      profile.resumeFileName = file.name;
+      els.resumeStatus.textContent = "正在识别...";
+      try {
+        const text = await extractResumeText(file);
+        els.resumeText.value = text;
+        applyResumeText(text, true);
+        els.resumeStatus.textContent = `已识别：${file.name}`;
+      } catch (error) {
+        els.resumeStatus.textContent = `已上传：${file.name}，自动识别失败，可粘贴文本`;
+      }
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...profile, resumeFileName: file.name }));
+    }
+
+    async function extractResumeText(file) {
+      const lowerName = file.name.toLowerCase();
+      const buffer = await file.arrayBuffer();
+      if (lowerName.endsWith(".docx")) {
+        await loadScript("https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js");
+        if (!window.mammoth) throw new Error("docx parser unavailable");
+        const result = await window.mammoth.extractRawText({ arrayBuffer: buffer });
+        return result.value.trim();
+      }
+      if (lowerName.endsWith(".pdf")) {
+        await loadScript("https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js");
+        if (!window.pdfjsLib) throw new Error("pdf parser unavailable");
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+        const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+        const pages = [];
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
+          const page = await pdf.getPage(pageNum);
+          const content = await page.getTextContent();
+          pages.push(content.items.map((item) => item.str).join(" "));
+        }
+        return pages.join("\n").trim();
+      }
+      throw new Error("unsupported file type");
+    }
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[src="${src}"]`);
+        if (existing) {
+          existing.addEventListener("load", resolve, { once: true });
+          if (existing.dataset.loaded === "true") resolve();
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = true;
+        script.onload = () => {
+          script.dataset.loaded = "true";
+          resolve();
+        };
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    function applyResumeText(text, overwriteEmptyOnly = true) {
+      const value = String(text || "").trim();
+      if (!value) return;
+      const patch = inferProfileFromResume(value);
+      if (patch.name && (!overwriteEmptyOnly || !els.profileName.value)) els.profileName.value = patch.name;
+      if (patch.school && (!overwriteEmptyOnly || !els.profileSchool.value)) els.profileSchool.value = patch.school;
+      if (patch.major && (!overwriteEmptyOnly || !els.profileMajor.value)) els.profileMajor.value = patch.major;
+      if (patch.degree && (!overwriteEmptyOnly || !els.profileDegree.value)) els.profileDegree.value = patch.degree;
+      if (patch.graduation && (!overwriteEmptyOnly || !els.profileGraduation.value)) els.profileGraduation.value = patch.graduation;
+      if (patch.skills && (!overwriteEmptyOnly || !els.profileSkills.value)) els.profileSkills.value = patch.skills;
+      if (!overwriteEmptyOnly || !els.profileExperience.value) els.profileExperience.value = value.slice(0, 3000);
+    }
+
+    function inferProfileFromResume(text) {
+      const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const firstLines = lines.slice(0, 10).join(" ");
+      const school = (text.match(/[\u4e00-\u9fa5A-Za-z]{2,30}(大学|学院|职业技术学院|高等专科学校)/) || [])[0] || "";
+      const major = ((text.match(/专业[:：\s]*([\u4e00-\u9fa5A-Za-z0-9]{2,24})/) || [])[1] || "").replace(/方向$/, "");
+      const graduation = (text.match(/20[2-3][0-9]\s*(届|年毕业|毕业)/) || [""])[0].match(/20[2-3][0-9]/)?.[0] || "";
+      const degree = text.includes("博士") ? "博士" : text.includes("硕士") || text.includes("研究生") ? "硕士" : text.includes("本科") ? "本科" : text.includes("专科") || text.includes("大专") ? "专科" : "";
+      const name = inferName(firstLines);
+      const skillPool = ["Python", "Java", "JavaScript", "C++", "SQL", "Excel", "PowerPoint", "PPT", "SPSS", "Tableau", "Power BI", "Axure", "Figma", "Photoshop", "Pr", "剪映", "CET-4", "CET-6", "英语四级", "英语六级", "教师资格证", "证券从业", "基金从业", "初级会计"];
+      const skills = skillPool.filter((skill) => text.toLowerCase().includes(skill.toLowerCase())).join("、");
+      return { name, school, major, graduation, degree, skills };
+    }
+
+    function inferName(text) {
+      const candidates = String(text || "").match(/[\u4e00-\u9fa5]{2,4}/g) || [];
+      const blocked = ["简历", "求职", "姓名", "电话", "邮箱", "学校", "专业", "教育", "经历"];
+      return candidates.find((item) => !blocked.some((word) => item.includes(word))) || "";
+    }
+
     function getRecommendedJobs(source) {
       const intents = profile.intents || [];
-      if (!intents.length) return [];
+      if (!hasProfileSignals()) return [];
       return source
         .map((job) => ({ job, score: recommendationScore(job, intents) }))
         .filter((item) => item.score > 0)
         .sort((a, b) => b.score - a.score)
         .map((item) => item.job);
+    }
+
+    function hasProfileSignals() {
+      return Boolean(
+        (profile.intents || []).length ||
+        profile.major ||
+        profile.degree ||
+        profile.skills ||
+        profile.campus ||
+        profile.experience ||
+        profile.resumeText
+      );
     }
 
     function recommendationScore(job, intents) {
@@ -1857,9 +2097,127 @@
       const major = normalizeText(profile.major);
       if (major && haystack.includes(major)) score += 2;
       if (profile.degree && matchesDegree(job, profile.degree)) score += 1;
+      splitTokens(profile.skills).forEach((skill) => {
+        if (skill.length >= 2 && haystack.includes(skill.toLowerCase())) score += 2;
+      });
+      splitTokens([profile.campus, profile.experience, profile.resumeText].join(" ")).slice(0, 60).forEach((word) => {
+        if (word.length >= 2 && haystack.includes(word.toLowerCase())) score += 0.3;
+      });
       const graduation = String(profile.graduation || "");
       if (graduation && String(job.target || "").includes(graduation)) score += 1;
       return score;
+    }
+
+    function analyzeJobMatch(job) {
+      const jobText = jobSearchText(job);
+      const strengths = [];
+      const weaknesses = [];
+      const additions = [];
+      let score = 0;
+
+      const intents = profile.intents || [];
+      const intentHits = intents.filter((intent) => normalizeText(intent) && jobText.includes(normalizeText(intent)));
+      if (intentHits.length) {
+        score += 30;
+        strengths.push(`意向岗位命中：${intentHits.slice(0, 3).join("、")}`);
+      } else if (intents.length) {
+        weaknesses.push("意向岗位与当前岗位名称/要求没有直接命中");
+      } else {
+        additions.push("补充 2-4 个意向岗位，可以显著提升推荐准确度");
+      }
+
+      if (profile.degree && matchesDegree(job, profile.degree)) {
+        score += 15;
+        strengths.push(`学历与岗位要求匹配：${profile.degree}`);
+      } else if (profile.degree) {
+        weaknesses.push(`学历与岗位要求需要人工确认：岗位写的是 ${job.degree}`);
+      } else {
+        additions.push("补充学历，便于判断是否满足投递门槛");
+      }
+
+      const major = normalizeText(profile.major);
+      if (major && jobText.includes(major)) {
+        score += 14;
+        strengths.push(`专业相关：${profile.major}`);
+      } else if (profile.major) {
+        weaknesses.push("专业关键词未在岗位要求中直接出现");
+      } else {
+        additions.push("补充专业，便于匹配专业要求");
+      }
+
+      const skillHits = splitTokens(profile.skills).filter((skill) => skill.length >= 2 && jobText.includes(skill.toLowerCase()));
+      if (skillHits.length) {
+        score += Math.min(25, skillHits.length * 5);
+        strengths.push(`技能/证书命中：${skillHits.slice(0, 5).join("、")}`);
+      } else if (profile.skills) {
+        weaknesses.push("已填写技能/证书，但当前岗位要求中没有明显命中");
+      } else {
+        additions.push("补充技能/证书，例如工具、语言、资格证、竞赛经历");
+      }
+
+      const experienceText = normalizeText([profile.campus, profile.experience, profile.resumeText, profile.portfolio].join(" "));
+      const experienceWords = ["实习", "项目", "运营", "数据", "分析", "开发", "产品", "设计", "销售", "财务", "研究", "竞赛", "负责人", "社团"];
+      const experienceHits = experienceWords.filter((word) => experienceText.includes(word) && jobText.includes(word));
+      if (experienceHits.length) {
+        score += Math.min(16, experienceHits.length * 4);
+        strengths.push(`经历关键词相关：${experienceHits.slice(0, 4).join("、")}`);
+      } else {
+        additions.push("补充可量化经历，例如项目目标、你的动作、结果数据");
+      }
+
+      if (profile.portfolio) {
+        score += 5;
+        strengths.push("已补充作品集/项目链接，方便展示成果");
+      } else if (/设计|开发|产品|运营|内容|新媒体|数据/.test(job.role + job.type)) {
+        additions.push("这个方向建议补充作品集或项目链接");
+      }
+
+      if (!weaknesses.length) weaknesses.push("暂无明显短板，建议继续核对岗位细则和截止时间");
+      if (!additions.length) additions.push("面试前准备 1 段匹配岗位的自我介绍和 2 个项目细节案例");
+
+      return {
+        score: Math.max(0, Math.min(100, Math.round(score))),
+        strengths: strengths.slice(0, 4),
+        weaknesses: weaknesses.slice(0, 4),
+        additions: additions.slice(0, 4)
+      };
+    }
+
+    function matchAnalysisHtml(analysis) {
+      return `
+        <div class="score-card">
+          <span class="muted">匹配度</span>
+          <strong>${analysis.score}</strong>
+          <span class="muted">/ 100</span>
+        </div>
+        ${analysisBox("优势", analysis.strengths)}
+        ${analysisBox("劣势", analysis.weaknesses)}
+        ${analysisBox("需补充", analysis.additions)}
+      `;
+    }
+
+    function analysisBox(title, items) {
+      return `
+        <div class="analysis-box">
+          <h4>${escapeHtml(title)}</h4>
+          <ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+      `;
+    }
+
+    function jobSearchText(job) {
+      return normalizeText([
+        job.company,
+        job.nature,
+        job.role,
+        job.type,
+        job.city,
+        job.degree,
+        job.major,
+        job.target,
+        job.responsibilities.join(" "),
+        job.requirements.join(" ")
+      ].join(" "));
     }
 
     function renderCalendar() {
@@ -1974,6 +2332,21 @@
       if (city === "全国") return jobCity.includes("全国") || jobCity.includes("多地");
       if (city === "远程") return jobCity.includes("远程") || jobCity.includes("线上");
       return jobCity.includes(city);
+    }
+
+    function matchesJobType(job, selectedType) {
+      const selected = normalizeText(selectedType);
+      if (!selected) return true;
+      const text = jobSearchText(job);
+      if (text.includes(selected)) return true;
+      if (selected === "实习") return /实习|intern|trainee/.test(text);
+      if (selected === "日常实习") return text.includes("日常") && text.includes("实习");
+      if (selected === "暑期实习") return /暑期实习|暑期|summer/.test(text);
+      if (selected === "正职") return /校招|全职|正职|管培|正式批|提前批|补录/.test(text) && !/实习|intern/.test(text);
+      if (selected === "提前批") return /提前批|提前批次/.test(text);
+      if (selected === "正式批") return /正式批|秋招|春招|校招/.test(text);
+      if (selected === "补录") return /补录|追加|二批/.test(text);
+      return false;
     }
 
     function matchesDegree(job, selectedDegree) {
