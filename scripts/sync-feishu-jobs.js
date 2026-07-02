@@ -85,7 +85,7 @@ async function main() {
 
   const payload = {
     syncedAt: new Date().toISOString(),
-    source: "feishu-bitable",
+    source: "public-recruitment-index",
     appToken: config.appToken,
     tableId: config.tableId,
     totalRecords: records.length,
