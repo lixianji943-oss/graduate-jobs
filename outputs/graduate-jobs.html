@@ -471,6 +471,77 @@
       font-size: 15px;
     }
 
+    .encourage-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 164px;
+      border: 1px solid rgba(16, 16, 16, 0.09);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      background:
+        radial-gradient(circle at 86% 18%, rgba(242, 169, 214, 0.85) 0 58px, transparent 59px),
+        radial-gradient(circle at 78% 84%, rgba(244, 216, 95, 0.9) 0 82px, transparent 83px),
+        linear-gradient(135deg, #fff6bd 0%, #fbdf8d 42%, #dff2e8 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .encourage-card h3 {
+      max-width: 430px;
+      margin: 0 0 8px;
+      font-size: 27px;
+      line-height: 1.12;
+    }
+
+    .encourage-card p {
+      max-width: 520px;
+      margin: 0;
+      color: #504638;
+      font-weight: 700;
+    }
+
+    .encourage-illustration {
+      position: absolute;
+      right: 30px;
+      bottom: 20px;
+      width: 132px;
+      height: 102px;
+      pointer-events: none;
+    }
+
+    .trophy {
+      position: absolute;
+      left: 48px;
+      bottom: 8px;
+      width: 34px;
+      height: 82px;
+      border-radius: 15px 15px 4px 4px;
+      background: linear-gradient(180deg, #ff9a2b, #f4d85f);
+      box-shadow: inset 8px 0 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .ribbon {
+      position: absolute;
+      left: 6px;
+      bottom: 32px;
+      width: 122px;
+      height: 28px;
+      border-radius: 999px;
+      transform: rotate(-9deg);
+      background: linear-gradient(90deg, #ff7d28, #f4d85f);
+    }
+
+    .spark {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #ff8d2d;
+      transform: rotate(45deg);
+    }
+
+    .spark.one { right: 18px; top: 8px; }
+    .spark.two { right: 2px; top: 32px; width: 7px; height: 7px; }
+
     .profile-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -574,10 +645,27 @@
 
     .day-num {
       display: flex;
-      justify-content: space-between;
+      align-items: baseline;
+      justify-content: flex-start;
       gap: 6px;
       font-weight: 900;
+    }
+
+    .day-date {
+      color: var(--black);
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .day-slash {
+      color: #d19a0c;
       font-size: 13px;
+    }
+
+    .day-count {
+      color: var(--green);
+      font-size: 12px;
+      line-height: 1;
     }
 
     .dots {
@@ -873,6 +961,16 @@
             </section>
           </div>
           <div>
+            <section class="encourage-card">
+              <h3 id="encourageTitle">今天也向 offer 靠近一点</h3>
+              <p id="encourageText">把目标拆小，投递、复盘、准备笔试，每一步都算数。</p>
+              <div class="encourage-illustration" aria-hidden="true">
+                <div class="ribbon"></div>
+                <div class="trophy"></div>
+                <div class="spark one"></div>
+                <div class="spark two"></div>
+              </div>
+            </section>
             <section class="panel">
               <div class="panel-head">
                 <h3>个人信息</h3>
@@ -902,6 +1000,7 @@
             <h3>个人信息卡片</h3>
             <div class="btn-row">
               <button class="btn" id="clearProfile" type="button">清空</button>
+              <button class="btn pink" id="recommendFromProfile" type="button">为我推荐</button>
               <button class="btn primary" id="saveProfile" type="button">保存信息</button>
             </div>
           </div>
@@ -926,6 +1025,16 @@
             <div class="field">
               <label for="profileGraduation">毕业年份</label>
               <input id="profileGraduation" type="text" placeholder="例如：2026">
+            </div>
+            <div class="field">
+              <label for="profileDegree">学历</label>
+              <select id="profileDegree">
+                <option value="">请选择</option>
+                <option value="专科">专科</option>
+                <option value="本科">本科</option>
+                <option value="硕士">硕士</option>
+                <option value="博士">博士</option>
+              </select>
             </div>
             <div class="field">
               <label for="profileSchool">学校</label>
@@ -1145,10 +1254,22 @@
       }
     ];
 
+    const dailyQuotes = [
+      ["今天也向 offer 靠近一点", "把目标拆小，投递、复盘、准备笔试，每一步都算数。"],
+      ["先完成一次有效投递", "不用一次做到完美，先让简历抵达机会面前。"],
+      ["把焦虑换成一个动作", "筛 3 个岗位、改 1 段经历、记录 1 个截止时间，就很好。"],
+      ["你不是在海投，你是在校准方向", "每一次浏览和收藏，都会让下一次选择更清楚。"],
+      ["今天的认真会被看见", "把经历写具体，把目标写清楚，机会就更容易认出你。"],
+      ["先赢下一小步", "一个待办、一次复盘、一条投递记录，都会慢慢攒成底气。"],
+      ["保持节奏，比爆发更重要", "求职不是一天跑完的路，稳定推进就已经很厉害。"]
+    ];
+
     const els = {
       viewTitle: document.querySelector("#viewTitle"),
       viewSubtitle: document.querySelector("#viewSubtitle"),
       syncStatus: document.querySelector("#syncStatus"),
+      encourageTitle: document.querySelector("#encourageTitle"),
+      encourageText: document.querySelector("#encourageText"),
       metricToday: document.querySelector("#metricToday"),
       metricTotal: document.querySelector("#metricTotal"),
       metricFavorites: document.querySelector("#metricFavorites"),
@@ -1177,6 +1298,7 @@
       profileAge: document.querySelector("#profileAge"),
       profileGender: document.querySelector("#profileGender"),
       profileGraduation: document.querySelector("#profileGraduation"),
+      profileDegree: document.querySelector("#profileDegree"),
       profileSchool: document.querySelector("#profileSchool"),
       profileMajor: document.querySelector("#profileMajor"),
       intentChips: document.querySelector("#intentChips"),
@@ -1184,6 +1306,7 @@
       profileCampus: document.querySelector("#profileCampus"),
       profileExperience: document.querySelector("#profileExperience"),
       saveProfile: document.querySelector("#saveProfile"),
+      recommendFromProfile: document.querySelector("#recommendFromProfile"),
       clearProfile: document.querySelector("#clearProfile"),
       jobDialog: document.querySelector("#jobDialog"),
       closeDialog: document.querySelector("#closeDialog"),
@@ -1259,6 +1382,12 @@
       });
       els.intentInput.addEventListener("blur", () => addIntent(els.intentInput.value));
       els.saveProfile.addEventListener("click", saveProfileFromForm);
+      els.recommendFromProfile.addEventListener("click", () => {
+        saveProfileFromForm("jobs");
+        showingRecommended = true;
+        els.showRecommended.textContent = "显示全部岗位";
+        renderJobs();
+      });
       els.clearProfile.addEventListener("click", clearProfile);
 
       els.closeDialog.addEventListener("click", closeJob);
@@ -1327,12 +1456,21 @@
 
     function renderAll() {
       updateMetrics();
+      renderDailyEncouragement();
       renderProfileSummary();
       renderCalendar();
       renderTodoList();
       renderJobs();
       renderSavedLists();
       renderHomeRecommended();
+    }
+
+    function renderDailyEncouragement() {
+      const start = new Date(new Date().getFullYear(), 0, 0);
+      const dayOfYear = Math.floor((new Date() - start) / 86400000);
+      const [title, text] = dailyQuotes[dayOfYear % dailyQuotes.length];
+      els.encourageTitle.textContent = title;
+      els.encourageText.textContent = text;
     }
 
     function updateMetrics() {
@@ -1348,6 +1486,7 @@
         ["姓名", profile.name || "未填写"],
         ["学校", profile.school || "未填写"],
         ["专业", profile.major || "未填写"],
+        ["学历", profile.degree || "未填写"],
         ["毕业年份", profile.graduation || "未填写"],
         ["意向岗位", (profile.intents || []).join("、") || "未填写"],
         ["经历", profile.experience ? "已填写" : "未填写"]
@@ -1623,18 +1762,20 @@
       els.profileAge.value = profile.age || "";
       els.profileGender.value = profile.gender || "";
       els.profileGraduation.value = profile.graduation || "";
+      els.profileDegree.value = profile.degree || "";
       els.profileSchool.value = profile.school || "";
       els.profileMajor.value = profile.major || "";
       els.profileCampus.value = profile.campus || "";
       els.profileExperience.value = profile.experience || "";
     }
 
-    function saveProfileFromForm() {
+    function saveProfileFromForm(nextView = "home") {
       profile = {
         name: els.profileName.value.trim(),
         age: els.profileAge.value.trim(),
         gender: els.profileGender.value,
         graduation: els.profileGraduation.value.trim(),
+        degree: els.profileDegree.value,
         school: els.profileSchool.value.trim(),
         major: els.profileMajor.value.trim(),
         intents: profile.intents || [],
@@ -1643,7 +1784,7 @@
       };
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
       renderAll();
-      switchView("home");
+      switchView(nextView);
     }
 
     function clearProfile() {
@@ -1715,6 +1856,7 @@
       });
       const major = normalizeText(profile.major);
       if (major && haystack.includes(major)) score += 2;
+      if (profile.degree && matchesDegree(job, profile.degree)) score += 1;
       const graduation = String(profile.graduation || "");
       if (graduation && String(job.target || "").includes(graduation)) score += 1;
       return score;
@@ -1740,7 +1882,11 @@
         const done = dayTodos.filter((todo) => todo.done).length;
         return `
           <button class="day ${date === todayString() ? "today" : ""}" type="button" data-date="${date}">
-            <div class="day-num"><span>${Number(date.slice(-2))}</span><span>${dayTodos.length}</span></div>
+            <div class="day-num">
+              <span class="day-date">${Number(date.slice(-2))}</span>
+              <span class="day-slash">/</span>
+              <span class="day-count">${dayTodos.length}</span>
+            </div>
             <div class="dots">
               ${dayTodos.map((todo) => `<span class="dot ${todo.done ? "done" : ""}"></span>`).join("")}
             </div>
