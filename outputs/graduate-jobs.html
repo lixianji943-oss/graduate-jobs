@@ -3,21 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>应届生岗位信息库</title>
+  <title>应届生 Win Job</title>
   <style>
     :root {
-      --bg: #f6f7f9;
-      --panel: #ffffff;
-      --ink: #20242a;
-      --muted: #68707d;
-      --line: #d9dee7;
-      --brand: #16695c;
-      --brand-dark: #0f4f45;
-      --blue: #265f9f;
-      --amber: #9a5b12;
-      --red: #a33434;
-      --green: #16714b;
-      --shadow: 0 10px 24px rgba(28, 36, 48, 0.08);
+      --bg: #f8f1e5;
+      --panel: #fffaf0;
+      --ink: #101010;
+      --muted: #6f675d;
+      --line: #ded4c7;
+      --black: #101010;
+      --green: #1d806c;
+      --green-soft: #dff2e8;
+      --yellow: #f4d85f;
+      --yellow-soft: #fff2a8;
+      --pink: #f2a9d6;
+      --pink-soft: #ffe0f1;
+      --blue-soft: #c9dcf5;
+      --shadow: 0 16px 38px rgba(16, 16, 16, 0.09);
+      --radius: 8px;
     }
 
     * {
@@ -29,12 +32,13 @@
       color: var(--ink);
       background: var(--bg);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     button,
     input,
-    select {
+    select,
+    textarea {
       font: inherit;
     }
 
@@ -42,175 +46,213 @@
       color: inherit;
     }
 
-    .page {
+    .app {
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
       min-height: 100vh;
     }
 
-    .topbar {
-      background: #fff;
-      border-bottom: 1px solid var(--line);
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 18px;
+      color: #fff;
+      background: var(--black);
+      overflow: auto;
     }
 
-    .topbar-inner {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 28px 24px 24px;
+    .brand {
       display: grid;
-      gap: 18px;
+      gap: 10px;
+      margin-bottom: 28px;
     }
 
-    .title-row {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 24px;
+    .brand-mark {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background:
+        radial-gradient(circle at 76% 23%, #fff8a8 0 5px, transparent 6px),
+        linear-gradient(135deg, #ffc648 0%, #ff7d28 48%, #f3b744 100%);
+      font-size: 23px;
+      font-weight: 900;
+      letter-spacing: 0;
+      box-shadow: 0 12px 26px rgba(255, 164, 38, 0.28);
     }
 
-    h1 {
+    .brand h1 {
       margin: 0;
-      font-size: clamp(28px, 4vw, 42px);
-      line-height: 1.12;
+      font-size: 25px;
+      line-height: 1.08;
       letter-spacing: 0;
     }
 
-    .subtitle {
-      max-width: 680px;
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    .primary-link,
-    .ghost-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 38px;
-      border-radius: 8px;
-      padding: 0 14px;
-      font-size: 14px;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .primary-link {
-      color: #fff;
-      background: var(--brand);
-    }
-
-    .primary-link:hover {
-      background: var(--brand-dark);
-    }
-
-    .ghost-link {
-      border: 1px solid var(--line);
-      color: var(--ink);
-      background: #fff;
-    }
-
-    .ghost-link:hover {
-      border-color: #aeb7c5;
-    }
-
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(86px, 1fr));
-      gap: 10px;
-      min-width: 310px;
-    }
-
-    .metric {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 10px 12px;
-      background: #fbfcfd;
-    }
-
-    .metric strong {
-      display: block;
-      font-size: 22px;
-      line-height: 1.15;
-    }
-
-    .metric span {
-      display: block;
-      margin-top: 2px;
-      color: var(--muted);
+    .brand p {
+      margin: 0;
+      color: #c9c4bd;
       font-size: 12px;
     }
 
-    main {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 22px 24px 46px;
-    }
-
-    .notice {
+    .nav-group {
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
+      gap: 8px;
+    }
+
+    .nav-title {
+      margin: 16px 0 4px;
+      color: #a49e96;
+      font-size: 12px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      padding: 0 12px;
+      display: flex;
       align-items: center;
-      margin-bottom: 16px;
-      border: 1px solid #cfded9;
-      border-radius: 8px;
-      padding: 14px 16px;
-      background: #f1f8f5;
+      gap: 10px;
+      color: #f8f1e5;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 700;
     }
 
-    .notice strong {
-      display: block;
-      margin-bottom: 2px;
-      color: var(--brand-dark);
-      font-size: 15px;
+    .nav-btn:hover,
+    .nav-btn.active {
+      color: var(--black);
+      background: var(--yellow);
     }
 
-    .notice span {
-      color: #53605c;
-      font-size: 13px;
+    .main {
+      min-width: 0;
+      padding: 28px;
     }
 
-    .profile-card {
+    .topline {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .page-title h2 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .page-title p {
+      max-width: 680px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .sync-pill {
+      min-width: 220px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      color: var(--muted);
+      background: rgba(255, 250, 240, 0.72);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .view {
       display: none;
-      grid-template-columns: 1fr auto;
-      gap: 16px;
-      align-items: center;
-      margin-bottom: 16px;
-      border: 1px solid #d8dfec;
-      border-radius: 8px;
-      padding: 14px 16px;
-      background: #fff;
-      box-shadow: 0 7px 18px rgba(28, 36, 48, 0.05);
     }
 
-    .profile-card.visible {
-      display: grid;
-    }
-
-    .profile-card strong {
+    .view.active {
       display: block;
-      margin-bottom: 4px;
-      color: var(--ink);
-      font-size: 16px;
     }
 
-    .profile-card span {
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 0.9fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      min-height: 116px;
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid rgba(16, 16, 16, 0.08);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 34px;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .stat-card span {
+      color: #403a32;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .yellow { background: var(--yellow); }
+    .pink { background: var(--pink); }
+    .green { background: #9fc36a; }
+    .blue { background: var(--blue-soft); }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .panel + .panel {
+      margin-top: 16px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .muted {
       color: var(--muted);
       font-size: 13px;
     }
 
     .filters {
       display: grid;
-      grid-template-columns: 1.6fr repeat(5, 1fr);
-      gap: 12px;
+      grid-template-columns: 1.4fr repeat(4, minmax(130px, 1fr));
+      gap: 10px;
       align-items: end;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .field {
@@ -219,27 +261,39 @@
     }
 
     label {
-      color: var(--muted);
+      color: #4f483e;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 800;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0 11px;
+      color: var(--ink);
+      background: #fffdf8;
+      outline: none;
     }
 
     input,
     select {
-      width: 100%;
       height: 40px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 0 11px;
-      color: var(--ink);
-      background: #fff;
-      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      padding-top: 9px;
+      resize: vertical;
     }
 
     input:focus,
-    select:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(22, 105, 92, 0.12);
+    select:focus,
+    textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(29, 128, 108, 0.12);
     }
 
     .toolbar {
@@ -248,104 +302,64 @@
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 12px;
-      color: var(--muted);
-      font-size: 14px;
     }
 
-    .toolbar-actions {
+    .btn-row {
       display: flex;
-      align-items: center;
       flex-wrap: wrap;
       gap: 8px;
-      justify-content: flex-end;
+      align-items: center;
     }
 
-    .view-tabs {
+    .btn {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0 13px;
+      color: var(--ink);
+      background: #fffdf8;
+      cursor: pointer;
+      font-weight: 800;
+      text-decoration: none;
       display: inline-flex;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      overflow: hidden;
-      background: #fff;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
     }
 
-    .view-tab {
-      height: 34px;
-      border: 0;
-      border-right: 1px solid var(--line);
-      padding: 0 12px;
-      color: var(--muted);
-      background: #fff;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .view-tab:last-child {
-      border-right: 0;
-    }
-
-    .view-tab.active {
+    .btn.primary {
+      border-color: var(--black);
       color: #fff;
-      background: var(--brand);
+      background: var(--black);
     }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+    .btn.green {
+      border-color: var(--green);
+      color: #fff;
+      background: var(--green);
     }
 
-    .form-grid .field.full {
-      grid-column: 1 / -1;
+    .btn.pink {
+      border-color: var(--pink);
+      background: var(--pink);
     }
 
-    .form-grid textarea,
-    .form-grid select[multiple] {
-      width: 100%;
-      min-height: 88px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 9px 11px;
-      color: var(--ink);
-      background: #fff;
-      resize: vertical;
-      outline: none;
-    }
-
-    .form-grid select[multiple] {
-      min-height: 132px;
-    }
-
-    .form-grid textarea:focus,
-    .form-grid select[multiple]:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(22, 105, 92, 0.12);
-    }
-
-    .reset {
-      height: 34px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 0 12px;
-      color: var(--ink);
-      background: #fff;
-      cursor: pointer;
-    }
-
-    .reset:hover {
-      border-color: #aeb7c5;
+    .btn.saved {
+      border-color: #d1a900;
+      background: var(--yellow-soft);
     }
 
     .table-shell {
-      overflow: hidden;
+      overflow-x: auto;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
+      border-radius: var(--radius);
+      background: #fffdf8;
       box-shadow: var(--shadow);
     }
 
-    .jobs-table {
+    table {
       width: 100%;
+      min-width: 1060px;
       border-collapse: collapse;
       table-layout: fixed;
     }
@@ -359,10 +373,10 @@
     }
 
     th {
-      color: #4d5663;
-      background: #f9fafc;
+      color: #564f45;
+      background: #f5ecdf;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 900;
     }
 
     tr:last-child td {
@@ -374,41 +388,55 @@
     }
 
     tbody tr:hover {
-      background: #fbfcfd;
+      background: #fffbf3;
     }
 
     .company {
-      font-weight: 700;
+      font-weight: 900;
     }
 
     .role {
-      color: var(--brand-dark);
-      font-weight: 700;
+      color: var(--green);
+      font-weight: 900;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
     }
 
-    .muted {
-      color: var(--muted);
-      font-size: 13px;
+    .clamp {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
     }
+
+    .clamp.two { -webkit-line-clamp: 2; }
+    .clamp.three { -webkit-line-clamp: 3; }
+    .clamp.four { -webkit-line-clamp: 4; }
 
     .tagline {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-top: 7px;
+      margin-top: 8px;
     }
 
     .tag {
       display: inline-flex;
       align-items: center;
       min-height: 24px;
-      border: 1px solid #dce3ea;
+      border: 1px solid #ddd2c3;
       border-radius: 999px;
       padding: 2px 8px;
-      color: #47515f;
-      background: #f7f9fb;
+      color: #51483d;
+      background: #fff8ea;
       font-size: 12px;
       white-space: nowrap;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .status {
@@ -418,80 +446,176 @@
       border-radius: 999px;
       padding: 3px 9px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 900;
       white-space: nowrap;
     }
 
-    .status.open {
-      color: var(--green);
-      background: #e9f6f0;
+    .status.open { color: #176b4c; background: var(--green-soft); }
+    .status.soon { color: #7a5600; background: var(--yellow-soft); }
+    .status.closed { color: #8f3434; background: #ffe0df; }
+
+    .card-list {
+      display: grid;
+      gap: 10px;
     }
 
-    .status.soon {
-      color: var(--amber);
-      background: #fff4df;
+    .mini-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 13px;
+      background: #fffdf8;
     }
 
-    .status.closed {
-      color: var(--red);
-      background: #fbe9e9;
+    .mini-card h4 {
+      margin: 0 0 5px;
+      font-size: 15px;
     }
 
-    .apply {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 88px;
-      height: 34px;
-      border-radius: 8px;
-      color: #fff;
-      background: var(--brand);
-      font-size: 13px;
-      font-weight: 700;
-      text-decoration: none;
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
-    .apply:hover {
-      background: var(--brand-dark);
+    .profile-grid .full {
+      grid-column: 1 / -1;
     }
 
-    .favorite {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 88px;
-      height: 34px;
-      border: 1px solid #cfd7e2;
-      border-radius: 8px;
-      padding: 0 10px;
-      color: #45505d;
-      background: #fff;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .favorite:hover {
-      border-color: #aeb7c5;
-    }
-
-    .favorite.saved {
-      border-color: #f0c36b;
-      color: #7b520e;
-      background: #fff7e5;
-    }
-
-    .row-actions {
+    .chip-input {
       display: flex;
-      align-items: center;
       flex-wrap: wrap;
+      gap: 6px;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 6px;
+      background: #fffdf8;
+    }
+
+    .chip-input input {
+      flex: 1;
+      min-width: 160px;
+      height: 30px;
+      border: 0;
+      padding: 0 6px;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: var(--pink-soft);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .chip button {
+      width: 18px;
+      height: 18px;
+      border: 0;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--black);
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .profile-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-item {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      background: #fffdf8;
+    }
+
+    .summary-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .summary-item strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 8px;
     }
 
-    .empty {
-      padding: 42px 20px;
-      color: var(--muted);
-      text-align: center;
+    .day {
+      min-height: 76px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 8px;
+      background: #fffdf8;
+      cursor: pointer;
+    }
+
+    .day.today {
+      border-color: var(--black);
+      background: var(--yellow-soft);
+    }
+
+    .day-num {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .dots {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--pink);
+    }
+
+    .dot.done {
+      background: var(--green);
+    }
+
+    .todo-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .todo {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 9px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 9px;
+      background: #fffdf8;
+    }
+
+    .todo.done {
+      opacity: 0.68;
     }
 
     .mobile-list {
@@ -501,16 +625,15 @@
 
     .job-card {
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: var(--radius);
       padding: 14px;
-      background: #fff;
-      box-shadow: 0 7px 18px rgba(28, 36, 48, 0.06);
+      background: #fffdf8;
+      box-shadow: var(--shadow);
       cursor: pointer;
     }
 
     .card-head {
       display: flex;
-      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 8px;
@@ -524,38 +647,46 @@
       margin-top: 12px;
     }
 
-    .card-buttons {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-end;
+    .empty {
+      padding: 42px 20px;
+      color: var(--muted);
+      text-align: center;
     }
 
     dialog {
       width: min(760px, calc(100vw - 28px));
-      max-height: min(82vh, 760px);
+      max-height: min(86vh, 760px);
       border: 0;
-      border-radius: 8px;
+      border-radius: var(--radius);
       padding: 0;
       color: var(--ink);
-      box-shadow: 0 24px 70px rgba(14, 20, 30, 0.26);
+      box-shadow: 0 24px 70px rgba(16, 16, 16, 0.28);
     }
 
     dialog::backdrop {
-      background: rgba(18, 25, 35, 0.48);
+      background: rgba(16, 16, 16, 0.5);
     }
 
     .modal {
       display: grid;
-      max-height: min(82vh, 760px);
+      max-height: min(86vh, 760px);
       grid-template-rows: auto 1fr auto;
-      background: #fff;
+      background: var(--panel);
     }
 
-    .modal-head {
-      padding: 22px 24px 16px;
+    .modal-head,
+    .modal-foot {
+      padding: 18px 22px;
       border-bottom: 1px solid var(--line);
+    }
+
+    .modal-foot {
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
     }
 
     .modal-title-row {
@@ -567,55 +698,56 @@
     .modal h2 {
       margin: 4px 0 0;
       font-size: 25px;
-      line-height: 1.22;
+      line-height: 1.2;
       letter-spacing: 0;
+    }
+
+    .modal-body {
+      overflow: auto;
+      padding: 18px 22px;
     }
 
     .close {
       width: 36px;
       height: 36px;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
+      border-radius: var(--radius);
+      background: #fffdf8;
       cursor: pointer;
       font-size: 20px;
       line-height: 1;
     }
 
-    .modal-body {
-      overflow: auto;
-      padding: 20px 24px 8px;
-    }
-
     .detail-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
       margin-bottom: 18px;
     }
 
     .detail {
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: var(--radius);
       padding: 10px 12px;
-      background: #fbfcfd;
+      background: #fffdf8;
     }
 
     .detail span {
       display: block;
       color: var(--muted);
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 900;
     }
 
     .detail strong {
       display: block;
       margin-top: 4px;
       font-size: 14px;
+      word-break: break-word;
     }
 
     .section {
-      margin: 0 0 18px;
+      margin-bottom: 18px;
     }
 
     .section h3 {
@@ -626,88 +758,58 @@
     .section ul {
       margin: 0;
       padding-left: 19px;
-      color: #38414d;
     }
 
     .section li + li {
       margin-top: 6px;
     }
 
-    .source-line {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .modal-foot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 24px 20px;
-      border-top: 1px solid var(--line);
-    }
-
-    .secondary {
-      height: 38px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 0 13px;
-      background: #fff;
-      cursor: pointer;
-    }
-
-    @media (max-width: 980px) {
-      .title-row {
-        align-items: stretch;
-        flex-direction: column;
+    @media (max-width: 1050px) {
+      .app {
+        grid-template-columns: 1fr;
       }
 
-      .metrics {
-        min-width: 0;
+      .sidebar {
+        position: static;
+        height: auto;
       }
 
-      .filters {
-        grid-template-columns: repeat(2, 1fr);
+      .nav-group {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
       }
 
-      .filters .field:first-child {
-        grid-column: 1 / -1;
+      .dashboard-grid,
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
       }
     }
 
     @media (max-width: 760px) {
-      .topbar-inner,
-      main {
-        padding-left: 16px;
-        padding-right: 16px;
+      .main {
+        padding: 16px;
       }
 
-      .metrics {
-        grid-template-columns: repeat(3, 1fr);
+      .topline,
+      .toolbar,
+      .modal-foot {
+        align-items: stretch;
+        flex-direction: column;
       }
 
-      .metric {
-        padding: 9px;
+      .sync-pill {
+        text-align: left;
       }
 
-      .metric strong {
-        font-size: 19px;
-      }
-
-      .filters {
+      .filters,
+      .profile-grid,
+      .profile-summary,
+      .dashboard-grid,
+      .stats-grid {
         grid-template-columns: 1fr;
       }
 
-      .notice {
-        grid-template-columns: 1fr;
-      }
-
-      .profile-card {
-        grid-template-columns: 1fr;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr;
+      .nav-group {
+        grid-template-columns: 1fr 1fr;
       }
 
       .table-shell {
@@ -721,153 +823,220 @@
       .detail-grid {
         grid-template-columns: 1fr;
       }
-
-      .modal-foot {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .modal-foot .apply,
-      .modal-foot .favorite,
-      .modal-foot .secondary {
-        width: 100%;
-      }
-
-      .modal-foot .row-actions {
-        width: 100%;
-      }
-
-      .modal-foot .row-actions > * {
-        flex: 1;
-      }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <header class="topbar">
-      <div class="topbar-inner">
-        <div class="title-row">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">win</div>
+        <div>
+          <h1>应届生<br>Win Job</h1>
+          <p>从信息筛选到投递管理，一个地方完成。</p>
+        </div>
+      </div>
+      <div class="nav-title">求职工作台</div>
+      <nav class="nav-group" aria-label="主导航">
+        <button class="nav-btn active" data-nav="home" type="button">首页</button>
+        <button class="nav-btn" data-nav="profile" type="button">个人信息</button>
+        <button class="nav-btn" data-nav="jobs" type="button">岗位信息</button>
+        <button class="nav-btn" data-nav="favorites" type="button">已收藏岗位</button>
+        <button class="nav-btn" data-nav="applied" type="button">已投递岗位</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="topline">
+        <div class="page-title">
+          <h2 id="viewTitle">首页</h2>
+          <p id="viewSubtitle">今日新增、收藏、投递、待办，一眼看清你的求职进度。</p>
+        </div>
+        <div class="sync-pill" id="syncStatus">数据源：正在检查外部岗位数据...</div>
+      </div>
+
+      <section class="view active" id="homeView">
+        <div class="dashboard-grid">
           <div>
-            <h1>应届生岗位信息库</h1>
-            <p class="subtitle">收录同学提交与官方来源核验过的岗位，按城市、企业性质、岗位类型、学历和截止时间快速筛选。</p>
-            <div class="hero-actions">
-              <a class="primary-link" href="https://yal2at57cvq.feishu.cn/base/GtSLbyyR3aCENOsJYC6cdlsVnih?from=from_copylink" target="_blank" rel="noopener noreferrer">提交岗位</a>
-              <a class="ghost-link" href="https://yal2at57cvq.feishu.cn/base/GtSLbyyR3aCENOsJYC6cdlsVnih?from=from_copylink" target="_blank" rel="noopener noreferrer">打开飞书表格</a>
-              <button class="ghost-link" id="openProfile" type="button">登录/个人档案</button>
+            <div class="stats-grid">
+              <div class="stat-card yellow"><strong id="metricToday">0</strong><span>每日新增岗位</span></div>
+              <div class="stat-card pink"><strong id="metricTotal">0</strong><span>浏览岗位</span></div>
+              <div class="stat-card green"><strong id="metricFavorites">0</strong><span>收藏岗位</span></div>
+              <div class="stat-card blue"><strong id="metricApplied">0</strong><span>已投递岗位</span></div>
+            </div>
+            <section class="panel">
+              <div class="panel-head">
+                <h3>推荐岗位</h3>
+                <button class="btn" data-nav-jump="jobs" type="button">浏览全部</button>
+              </div>
+              <div class="card-list" id="homeRecommended"></div>
+            </section>
+          </div>
+          <div>
+            <section class="panel">
+              <div class="panel-head">
+                <h3>个人信息</h3>
+                <button class="btn" data-nav-jump="profile" type="button">编辑</button>
+              </div>
+              <div class="profile-summary" id="profileSummary"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h3>待办日历</h3>
+                <span class="muted" id="calendarMonth"></span>
+              </div>
+              <div class="calendar" id="calendarGrid"></div>
+              <div class="panel-head" style="margin-top: 16px;">
+                <h3 id="todoTitle">今日待办</h3>
+                <button class="btn pink" id="addTodayTodo" type="button">新增待办</button>
+              </div>
+              <div class="todo-list" id="todoList"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="profileView">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>个人信息卡片</h3>
+            <div class="btn-row">
+              <button class="btn" id="clearProfile" type="button">清空</button>
+              <button class="btn primary" id="saveProfile" type="button">保存信息</button>
             </div>
           </div>
-          <div class="metrics" aria-label="岗位概览">
-            <div class="metric">
-              <strong id="metricTotal">0</strong>
-              <span>收录岗位</span>
+          <div class="profile-grid">
+            <div class="field">
+              <label for="profileName">姓名</label>
+              <input id="profileName" type="text" autocomplete="name">
             </div>
-            <div class="metric">
-              <strong id="metricOpen">0</strong>
-              <span>可投递</span>
+            <div class="field">
+              <label for="profileAge">年龄</label>
+              <input id="profileAge" type="number" min="16" max="60">
             </div>
-            <div class="metric">
-              <strong id="metricSoon">0</strong>
-              <span>即将截止</span>
+            <div class="field">
+              <label for="profileGender">性别</label>
+              <select id="profileGender">
+                <option value="">不填写</option>
+                <option value="女">女</option>
+                <option value="男">男</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="profileGraduation">毕业年份</label>
+              <input id="profileGraduation" type="text" placeholder="例如：2026">
+            </div>
+            <div class="field">
+              <label for="profileSchool">学校</label>
+              <input id="profileSchool" type="text">
+            </div>
+            <div class="field">
+              <label for="profileMajor">专业</label>
+              <input id="profileMajor" type="text">
+            </div>
+            <div class="field full">
+              <label for="intentInput">意向岗位（手动输入，按 Enter 添加；顺序越靠前，推荐权重越高）</label>
+              <div class="chip-input" id="intentChips">
+                <input id="intentInput" type="text" placeholder="例如：产品经理、数据分析、Java开发">
+              </div>
+            </div>
+            <div class="field full">
+              <label for="profileCampus">校园经历</label>
+              <textarea id="profileCampus"></textarea>
+            </div>
+            <div class="field full">
+              <label for="profileExperience">实习 / 项目 / 工作经验</label>
+              <textarea id="profileExperience"></textarea>
             </div>
           </div>
-        </div>
-      </div>
-    </header>
-
-    <main>
-      <section class="notice" aria-label="岗位收录说明">
-        <div>
-          <strong>零预算收录流程</strong>
-          <span>岗位先提交到飞书表格，审核通过后再展示到网站；建议只收官方招聘系统、企业官网、学校就业网和官方公告链接。</span>
-          <span id="syncStatus" style="display:block; margin-top:4px;">数据源：正在检查外部岗位数据...</span>
-        </div>
-        <a class="ghost-link" href="https://yal2at57cvq.feishu.cn/base/GtSLbyyR3aCENOsJYC6cdlsVnih?from=from_copylink" target="_blank" rel="noopener noreferrer">去表格审核</a>
+        </section>
       </section>
 
-      <section class="profile-card" id="profileCard" aria-label="个人信息卡片">
-        <div>
-          <strong id="profileCardName">未登录</strong>
-          <span id="profileCardSummary">填写个人档案后，可以按意向岗位生成推荐列表。</span>
-        </div>
-        <button class="ghost-link" id="editProfile" type="button">编辑档案</button>
-      </section>
-
-      <section class="filters" aria-label="岗位筛选">
-        <div class="field">
-          <label for="keyword">关键词</label>
-          <input id="keyword" type="search" placeholder="搜索企业、岗位、专业或职责">
-        </div>
-        <div class="field">
-          <label for="city">工作地点</label>
-          <select id="city">
-            <option value="">全部</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="nature">企业性质</label>
-          <select id="nature">
-            <option value="">全部</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="type">岗位类型</label>
-          <select id="type">
-            <option value="">全部</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="degree">学历要求</label>
-          <select id="degree">
-            <option value="">全部</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="status">投递状态</label>
-          <select id="status">
-            <option value="">全部</option>
-          </select>
-        </div>
-      </section>
-
-      <div class="toolbar">
-        <span id="resultCount">正在显示 0 个岗位</span>
-        <div class="toolbar-actions">
-          <div class="view-tabs" aria-label="岗位视图">
-            <button class="view-tab active" id="allJobsView" type="button">全部岗位</button>
-            <button class="view-tab" id="recommendView" type="button">为我推荐</button>
-            <button class="view-tab" id="favoritesView" type="button">我的收藏 <span id="favoriteCount">0</span></button>
+      <section class="view" id="jobsView">
+        <section class="panel">
+          <div class="filters">
+            <div class="field">
+              <label for="keyword">关键词</label>
+              <input id="keyword" type="search" placeholder="搜索企业、岗位、专业或职责">
+            </div>
+            <div class="field">
+              <label for="city">工作地点（可手动输入）</label>
+              <input id="city" type="search" placeholder="例如：北京、上海、全国">
+            </div>
+            <div class="field">
+              <label for="nature">企业性质</label>
+              <select id="nature"><option value="">全部</option></select>
+            </div>
+            <div class="field">
+              <label for="degree">学历要求</label>
+              <select id="degree">
+                <option value="">全部</option>
+                <option value="专科">专科</option>
+                <option value="专科及以上">专科及以上</option>
+                <option value="本科及以上">本科及以上</option>
+                <option value="硕士及以上">硕士及以上</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="status">投递状态</label>
+              <select id="status"><option value="">全部</option></select>
+            </div>
           </div>
-          <button class="reset" id="resetFilters" type="button">重置筛选</button>
-        </div>
-      </div>
-
-      <section class="table-shell" aria-label="岗位列表">
-        <table class="jobs-table">
-          <colgroup>
-            <col style="width: 20%;">
-            <col style="width: 24%;">
-            <col style="width: 13%;">
-            <col style="width: 14%;">
-            <col style="width: 13%;">
-            <col style="width: 16%;">
-          </colgroup>
-          <thead>
-            <tr>
-              <th>企业</th>
-              <th>岗位</th>
-              <th>地点</th>
-              <th>要求</th>
-              <th>截止</th>
-              <th>投递</th>
-            </tr>
-          </thead>
-          <tbody id="jobsBody"></tbody>
-        </table>
-        <div class="empty" id="emptyTable" hidden>没有匹配的岗位，换一个筛选条件试试。</div>
+          <div class="toolbar">
+            <span class="muted" id="resultCount">正在显示 0 个岗位</span>
+            <div class="btn-row">
+              <button class="btn" id="showRecommended" type="button">为我推荐</button>
+              <button class="btn" id="resetFilters" type="button">重置筛选</button>
+            </div>
+          </div>
+          <div class="table-shell">
+            <table>
+              <colgroup>
+                <col style="width: 18%;">
+                <col style="width: 24%;">
+                <col style="width: 14%;">
+                <col style="width: 19%;">
+                <col style="width: 10%;">
+                <col style="width: 15%;">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>企业</th>
+                  <th>岗位</th>
+                  <th>地点</th>
+                  <th>要求</th>
+                  <th>截止</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="jobsBody"></tbody>
+            </table>
+            <div class="empty" id="emptyTable" hidden>没有匹配的岗位，换一个筛选条件试试。</div>
+          </div>
+          <div class="mobile-list" id="mobileList"></div>
+        </section>
       </section>
 
-      <section class="mobile-list" id="mobileList" aria-label="移动端岗位列表"></section>
+      <section class="view" id="favoritesView">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>已收藏岗位</h3>
+            <button class="btn" data-nav-jump="jobs" type="button">继续浏览</button>
+          </div>
+          <div class="card-list" id="favoriteList"></div>
+        </section>
+      </section>
+
+      <section class="view" id="appliedView">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>已投递岗位</h3>
+            <button class="btn" data-nav-jump="jobs" type="button">继续投递</button>
+          </div>
+          <div class="card-list" id="appliedList"></div>
+        </section>
+      </section>
     </main>
   </div>
 
@@ -895,91 +1064,44 @@
         </section>
         <section class="section">
           <h3>薪资与福利</h3>
-          <p class="source-line" id="modalSalary"></p>
+          <p class="muted" id="modalSalary"></p>
         </section>
         <section class="section">
           <h3>信息来源</h3>
-          <p class="source-line" id="modalSource"></p>
+          <p class="muted" id="modalSource"></p>
         </section>
       </div>
       <footer class="modal-foot">
-        <button class="secondary" id="closeFooter" type="button">返回列表</button>
-        <div class="row-actions">
-          <button class="favorite" id="modalFavorite" type="button">收藏岗位</button>
-          <a class="apply" id="modalApply" href="#" target="_blank" rel="noopener noreferrer">官方投递</a>
+        <button class="btn" id="closeFooter" type="button">返回列表</button>
+        <div class="btn-row">
+          <button class="btn" id="modalFavorite" type="button">收藏岗位</button>
+          <button class="btn pink" id="modalApplied" type="button">标记已投递</button>
+          <a class="btn green" id="modalApply" href="#" target="_blank" rel="noopener noreferrer">官方投递</a>
         </div>
       </footer>
     </article>
   </dialog>
 
-  <dialog id="profileDialog">
+  <dialog id="todoDialog">
     <article class="modal">
       <header class="modal-head">
         <div class="modal-title-row">
           <div>
-            <div class="company">本地登录</div>
-            <h2>个人信息卡片</h2>
+            <div class="company" id="todoDateLabel"></div>
+            <h2>待办项纪录</h2>
           </div>
-          <button class="close" id="closeProfile" type="button" aria-label="关闭">×</button>
+          <button class="close" id="closeTodo" type="button" aria-label="关闭">×</button>
         </div>
       </header>
       <div class="modal-body">
-        <form class="form-grid" id="profileForm">
-          <div class="field">
-            <label for="profileName">姓名</label>
-            <input id="profileName" type="text" autocomplete="name">
-          </div>
-          <div class="field">
-            <label for="profileAge">年龄</label>
-            <input id="profileAge" type="number" min="16" max="60">
-          </div>
-          <div class="field">
-            <label for="profileGender">性别</label>
-            <select id="profileGender">
-              <option value="">不填写</option>
-              <option value="女">女</option>
-              <option value="男">男</option>
-              <option value="其他">其他</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="profileGraduation">毕业年份</label>
-            <select id="profileGraduation">
-              <option value="">请选择</option>
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
-              <option value="2028">2028</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="profileSchool">学校</label>
-            <input id="profileSchool" type="text">
-          </div>
-          <div class="field">
-            <label for="profileMajor">专业</label>
-            <input id="profileMajor" type="text">
-          </div>
-          <div class="field full">
-            <label for="profileIntent">意向岗位（可多选）</label>
-            <select id="profileIntent" multiple></select>
-          </div>
-          <div class="field full">
-            <label for="profileCampus">校园经历</label>
-            <textarea id="profileCampus"></textarea>
-          </div>
-          <div class="field full">
-            <label for="profileExperience">实习 / 项目 / 工作经验</label>
-            <textarea id="profileExperience"></textarea>
-          </div>
-        </form>
+        <div class="field">
+          <label for="todoText">待办内容</label>
+          <input id="todoText" type="text" placeholder="例如：投递某公司、准备笔试、复盘面试">
+        </div>
       </div>
       <footer class="modal-foot">
-        <button class="secondary" id="clearProfile" type="button">清空档案</button>
-        <div class="row-actions">
-          <button class="secondary" id="cancelProfile" type="button">取消</button>
-          <button class="apply" id="saveProfile" type="button">保存并推荐</button>
-        </div>
+        <button class="btn" id="cancelTodo" type="button">取消</button>
+        <button class="btn primary" id="saveTodo" type="button">保存待办</button>
       </footer>
     </article>
   </dialog>
@@ -988,15 +1110,22 @@
     const DATA_ENDPOINT = "jobs-data.json";
     const MAX_RENDERED_JOBS = 200;
     const FAVORITES_KEY = "graduateJobFavorites";
+    const APPLIED_KEY = "graduateJobApplied";
     const PROFILE_KEY = "graduateJobProfile";
-    const DEGREE_OPTIONS = ["专科", "专科及以上", "本科及以上", "硕士及以上"];
-    const FALLBACK_INTENTS = ["技术研发", "产品运营", "数据分析", "市场品牌", "运营职能", "工程制造", "管培生", "医药健康", "金融", "销售", "设计", "职能"];
-    let activeView = "all";
-    let favoriteIds = loadFavoriteIds();
-    let profile = loadProfile();
-    let jobs = [
+    const TODOS_KEY = "graduateJobTodos";
+
+    let jobs = [];
+    let activeView = "home";
+    let showingRecommended = false;
+    let favoriteIds = loadSet(FAVORITES_KEY);
+    let appliedIds = loadSet(APPLIED_KEY);
+    let profile = loadObject(PROFILE_KEY);
+    let todos = loadObject(TODOS_KEY);
+    let selectedTodoDate = todayString();
+
+    const fallbackJobs = [
       {
-        id: 1,
+        id: "demo-1",
         company: "华星数字科技",
         nature: "民营企业",
         role: "前端开发工程师",
@@ -1007,238 +1136,56 @@
         target: "2026届",
         deadline: "2026-08-31",
         status: "可投递",
-        salary: "14k-20k/月，含餐补、租房补贴、年度体检",
+        salary: "14k-20k/月",
         source: "企业官网招聘系统",
-        updated: "2026-07-01",
-        link: "https://example.com/apply/frontend",
-        responsibilities: [
-          "参与校园招聘系统、数据看板等业务产品的前端开发。",
-          "与产品、设计和后端协作，完成页面交互、接口联调和性能优化。",
-          "沉淀通用组件，提升内部工具的开发效率和体验一致性。"
-        ],
-        requirements: [
-          "熟悉 HTML、CSS、JavaScript，了解至少一种主流前端框架。",
-          "具备清晰的代码习惯和基础工程化意识。",
-          "对用户体验敏感，有实习或项目作品优先。"
-        ]
-      },
-      {
-        id: 2,
-        company: "中原智能制造集团",
-        nature: "国有企业",
-        role: "机械工艺工程师",
-        type: "工程制造",
-        city: "郑州",
-        degree: "本科及以上",
-        major: "机械设计、材料成型、自动化",
-        target: "2026届",
-        deadline: "2026-07-20",
-        status: "即将截止",
-        salary: "未公开，提供住宿、安家补贴和培养津贴",
-        source: "学校就业网转载官方校招公告",
-        updated: "2026-06-29",
-        link: "https://example.com/apply/manufacturing",
-        responsibilities: [
-          "参与生产工艺文件编制、现场工艺改善和质量问题分析。",
-          "跟进新产品试制，协调生产、质量和设备团队解决异常。",
-          "协助推进自动化产线改造和工艺标准化。"
-        ],
-        requirements: [
-          "掌握机械制图、材料基础和常用工艺流程。",
-          "能适应制造现场工作节奏，沟通踏实主动。",
-          "有竞赛、课程设计或工厂实习经历优先。"
-        ]
-      },
-      {
-        id: 3,
-        company: "南山银行",
-        nature: "金融机构",
-        role: "管培生",
-        type: "管培生",
-        city: "广州",
-        degree: "硕士及以上",
-        major: "金融、经济、统计、计算机",
-        target: "2026届",
-        deadline: "2026-09-15",
-        status: "可投递",
-        salary: "未公开，按总行校招薪酬体系执行",
-        source: "企业官方公众号",
-        updated: "2026-07-01",
-        link: "https://example.com/apply/bank",
-        responsibilities: [
-          "轮岗学习公司金融、零售金融、风险管理、金融科技等业务。",
-          "参与重点项目研究、经营分析和业务流程优化。",
-          "完成分支机构与总行条线培养任务。"
-        ],
-        requirements: [
-          "具备较强学习能力、表达能力和数据分析意识。",
-          "认可金融行业长期发展，愿意接受跨部门轮岗。",
-          "学生干部、竞赛获奖或金融科技项目经历优先。"
-        ]
-      },
-      {
-        id: 4,
-        company: "青杉新能源",
-        nature: "上市公司",
-        role: "储能产品助理工程师",
-        type: "产品运营",
-        city: "合肥",
-        degree: "本科及以上",
-        major: "电气工程、能源动力、自动化",
-        target: "2026届",
-        deadline: "2026-10-10",
-        status: "可投递",
-        salary: "12k-18k/月，含项目奖金和交通补贴",
-        source: "企业官网招聘系统",
-        updated: "2026-06-30",
-        link: "https://example.com/apply/energy",
-        responsibilities: [
-          "协助梳理储能产品需求，跟进产品规格、测试和交付进度。",
-          "收集客户反馈和竞品信息，支持产品迭代。",
-          "参与产品资料、培训材料和解决方案文档编写。"
-        ],
-        requirements: [
-          "理解电力系统或储能基础知识，愿意学习产品管理方法。",
-          "逻辑表达清楚，能把技术问题转化为业务语言。",
-          "有新能源相关实习、课题或竞赛经历优先。"
-        ]
-      },
-      {
-        id: 5,
-        company: "明镜数据咨询",
-        nature: "外资企业",
-        role: "商业分析师",
-        type: "数据分析",
-        city: "上海",
-        degree: "本科及以上",
-        major: "统计、数学、商科、计算机",
-        target: "2026届",
-        deadline: "2026-08-05",
-        status: "可投递",
-        salary: "13k-19k/月，含商业保险和弹性办公",
-        source: "官方招聘页面",
-        updated: "2026-07-01",
-        link: "https://example.com/apply/analyst",
-        responsibilities: [
-          "参与行业研究、用户洞察和经营指标分析。",
-          "使用表格、SQL 或 BI 工具整理数据并输出分析结论。",
-          "协助项目经理准备客户汇报材料。"
-        ],
-        requirements: [
-          "具备数据敏感度和结构化表达能力。",
-          "熟悉 Excel，了解 SQL、Python 或 BI 工具者优先。",
-          "英语读写流畅，能阅读英文资料。"
-        ]
-      },
-      {
-        id: 6,
-        company: "北辰公益发展中心",
-        nature: "社会组织",
-        role: "项目运营专员",
-        type: "运营职能",
-        city: "北京",
-        degree: "本科及以上",
-        major: "社会学、公共管理、新闻传播、不限专业",
-        target: "应届不限",
-        deadline: "2026-07-12",
-        status: "即将截止",
-        salary: "8k-11k/月，含补充医疗和培训预算",
-        source: "官方公众号招聘推文",
-        updated: "2026-06-28",
-        link: "https://example.com/apply/ngo",
-        responsibilities: [
-          "负责青年成长类公益项目的活动执行、志愿者沟通和材料整理。",
-          "维护项目数据，协助完成阶段性报告和传播内容。",
-          "对接学校、社区和合作机构，推动项目落地。"
-        ],
-        requirements: [
-          "具备耐心、责任心和现场协调能力。",
-          "文字表达清楚，能独立完成基础项目文档。",
-          "有公益实践、社团活动或新媒体运营经历优先。"
-        ]
-      },
-      {
-        id: 7,
-        company: "海岳医药研究院",
-        nature: "科研院所",
-        role: "临床研究助理",
-        type: "医药健康",
-        city: "南京",
-        degree: "本科及以上",
-        major: "临床医学、药学、生物统计、护理",
-        target: "2026届",
-        deadline: "2026-11-30",
-        status: "可投递",
-        salary: "10k-15k/月，含餐补、交通补贴和补充保险",
-        source: "企业官网招聘系统",
-        updated: "2026-07-01",
-        link: "https://example.com/apply/clinical",
-        responsibilities: [
-          "协助临床试验文件管理、数据录入和研究中心沟通。",
-          "跟进伦理资料、受试者随访和项目进度记录。",
-          "配合项目团队完成稽查准备和质量检查。"
-        ],
-        requirements: [
-          "了解临床研究基本流程和医学基础知识。",
-          "做事细致，重视合规和文档准确性。",
-          "通过英语四级，有医院或 CRO 实习经历优先。"
-        ]
-      },
-      {
-        id: 8,
-        company: "星桥文旅",
-        nature: "民营企业",
-        role: "品牌内容策划",
-        type: "市场品牌",
-        city: "成都",
-        degree: "本科及以上",
-        major: "新闻传播、中文、广告、旅游管理",
-        target: "2026届",
-        deadline: "2026-06-25",
-        status: "已截止",
-        salary: "9k-13k/月，含项目奖金",
-        source: "官方招聘页面",
-        updated: "2026-06-20",
-        link: "https://example.com/apply/brand",
-        responsibilities: [
-          "负责文旅项目的内容选题、活动文案和社媒发布。",
-          "参与品牌传播方案策划，跟进拍摄、设计和上线流程。",
-          "收集用户反馈和热点趋势，优化内容表达。"
-        ],
-        requirements: [
-          "文字表达有审美，能把复杂信息写得清楚有吸引力。",
-          "熟悉主流内容平台，有作品集优先。",
-          "对城市文化、旅行和线下活动有兴趣。"
-        ]
+        updated: todayString(),
+        link: "https://example.com",
+        responsibilities: ["参与业务产品前端开发。", "与产品和后端协作完成交互与联调。"],
+        requirements: ["熟悉 HTML、CSS、JavaScript。", "有项目作品优先。"]
       }
     ];
 
     const els = {
+      viewTitle: document.querySelector("#viewTitle"),
+      viewSubtitle: document.querySelector("#viewSubtitle"),
+      syncStatus: document.querySelector("#syncStatus"),
+      metricToday: document.querySelector("#metricToday"),
+      metricTotal: document.querySelector("#metricTotal"),
+      metricFavorites: document.querySelector("#metricFavorites"),
+      metricApplied: document.querySelector("#metricApplied"),
+      profileSummary: document.querySelector("#profileSummary"),
+      homeRecommended: document.querySelector("#homeRecommended"),
+      calendarMonth: document.querySelector("#calendarMonth"),
+      calendarGrid: document.querySelector("#calendarGrid"),
+      todoTitle: document.querySelector("#todoTitle"),
+      todoList: document.querySelector("#todoList"),
+      addTodayTodo: document.querySelector("#addTodayTodo"),
       keyword: document.querySelector("#keyword"),
       city: document.querySelector("#city"),
       nature: document.querySelector("#nature"),
-      type: document.querySelector("#type"),
       degree: document.querySelector("#degree"),
       status: document.querySelector("#status"),
+      resultCount: document.querySelector("#resultCount"),
+      resetFilters: document.querySelector("#resetFilters"),
+      showRecommended: document.querySelector("#showRecommended"),
       jobsBody: document.querySelector("#jobsBody"),
       mobileList: document.querySelector("#mobileList"),
       emptyTable: document.querySelector("#emptyTable"),
-      resultCount: document.querySelector("#resultCount"),
-      allJobsView: document.querySelector("#allJobsView"),
-      recommendView: document.querySelector("#recommendView"),
-      favoritesView: document.querySelector("#favoritesView"),
-      favoriteCount: document.querySelector("#favoriteCount"),
-      openProfile: document.querySelector("#openProfile"),
-      editProfile: document.querySelector("#editProfile"),
-      profileCard: document.querySelector("#profileCard"),
-      profileCardName: document.querySelector("#profileCardName"),
-      profileCardSummary: document.querySelector("#profileCardSummary"),
-      syncStatus: document.querySelector("#syncStatus"),
-      metricTotal: document.querySelector("#metricTotal"),
-      metricOpen: document.querySelector("#metricOpen"),
-      metricSoon: document.querySelector("#metricSoon"),
-      resetFilters: document.querySelector("#resetFilters"),
-      dialog: document.querySelector("#jobDialog"),
+      favoriteList: document.querySelector("#favoriteList"),
+      appliedList: document.querySelector("#appliedList"),
+      profileName: document.querySelector("#profileName"),
+      profileAge: document.querySelector("#profileAge"),
+      profileGender: document.querySelector("#profileGender"),
+      profileGraduation: document.querySelector("#profileGraduation"),
+      profileSchool: document.querySelector("#profileSchool"),
+      profileMajor: document.querySelector("#profileMajor"),
+      intentChips: document.querySelector("#intentChips"),
+      intentInput: document.querySelector("#intentInput"),
+      profileCampus: document.querySelector("#profileCampus"),
+      profileExperience: document.querySelector("#profileExperience"),
+      saveProfile: document.querySelector("#saveProfile"),
+      clearProfile: document.querySelector("#clearProfile"),
+      jobDialog: document.querySelector("#jobDialog"),
       closeDialog: document.querySelector("#closeDialog"),
       closeFooter: document.querySelector("#closeFooter"),
       modalCompany: document.querySelector("#modalCompany"),
@@ -1250,298 +1197,80 @@
       modalSalary: document.querySelector("#modalSalary"),
       modalSource: document.querySelector("#modalSource"),
       modalFavorite: document.querySelector("#modalFavorite"),
+      modalApplied: document.querySelector("#modalApplied"),
       modalApply: document.querySelector("#modalApply"),
-      profileDialog: document.querySelector("#profileDialog"),
-      closeProfile: document.querySelector("#closeProfile"),
-      cancelProfile: document.querySelector("#cancelProfile"),
-      saveProfile: document.querySelector("#saveProfile"),
-      clearProfile: document.querySelector("#clearProfile"),
-      profileName: document.querySelector("#profileName"),
-      profileAge: document.querySelector("#profileAge"),
-      profileGender: document.querySelector("#profileGender"),
-      profileGraduation: document.querySelector("#profileGraduation"),
-      profileSchool: document.querySelector("#profileSchool"),
-      profileMajor: document.querySelector("#profileMajor"),
-      profileIntent: document.querySelector("#profileIntent"),
-      profileCampus: document.querySelector("#profileCampus"),
-      profileExperience: document.querySelector("#profileExperience")
+      todoDialog: document.querySelector("#todoDialog"),
+      todoDateLabel: document.querySelector("#todoDateLabel"),
+      todoText: document.querySelector("#todoText"),
+      closeTodo: document.querySelector("#closeTodo"),
+      cancelTodo: document.querySelector("#cancelTodo"),
+      saveTodo: document.querySelector("#saveTodo")
     };
 
-    const filterFields = ["city", "nature", "type", "degree", "status"];
+    const viewCopy = {
+      home: ["首页", "今日新增、收藏、投递、待办，一眼看清你的求职进度。"],
+      profile: ["个人信息", "填写你的求职档案，系统会按意向岗位顺序推荐岗位。"],
+      jobs: ["岗位信息", "浏览全部岗位，支持手动输入地点、关键词和学历筛选。"],
+      favorites: ["已收藏岗位", "把感兴趣的机会先收起来，稍后集中比较。"],
+      applied: ["已投递岗位", "记录已投递机会，管理后续笔试、面试和跟进。"]
+    };
+
     const statusClass = {
       "可投递": "open",
       "即将截止": "soon",
       "已截止": "closed"
     };
 
-    function uniqueValues(key) {
-      return [...new Set(jobs.map((job) => job[key]))].sort((a, b) => a.localeCompare(b, "zh-CN"));
+    init();
+
+    async function init() {
+      bindEvents();
+      fillProfileForm();
+      renderIntentChips();
+      await loadExternalJobs();
+      rebuildFilters();
+      renderAll();
     }
 
-    function uniqueCityValues() {
-      return [...new Set(jobs.flatMap((job) => splitTokens(job.city)).filter((city) => city && city !== "未公开"))]
-        .sort((a, b) => a.localeCompare(b, "zh-CN"));
-    }
-
-    function fillSelect(select, values) {
-      select.querySelectorAll("option:not(:first-child)").forEach((option) => option.remove());
-      values.forEach((value) => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        select.appendChild(option);
+    function bindEvents() {
+      document.querySelectorAll("[data-nav]").forEach((button) => {
+        button.addEventListener("click", () => switchView(button.dataset.nav));
       });
-    }
-
-    function makeStatus(status) {
-      return `<span class="status ${statusClass[status] || "open"}">${status}</span>`;
-    }
-
-    function loadFavoriteIds() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
-        return new Set(Array.isArray(saved) ? saved : []);
-      } catch (error) {
-        return new Set();
-      }
-    }
-
-    function saveFavoriteIds() {
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favoriteIds]));
-    }
-
-    function getJobKey(job) {
-      return String(job.id || job.link || `${job.company}-${job.role}-${job.city}`);
-    }
-
-    function isFavorite(job) {
-      return favoriteIds.has(getJobKey(job));
-    }
-
-    function favoriteLabel(job) {
-      return isFavorite(job) ? "已收藏" : "收藏岗位";
-    }
-
-    function favoriteClass(job) {
-      return isFavorite(job) ? "favorite saved" : "favorite";
-    }
-
-    function updateFavoriteCount() {
-      const validIds = new Set(jobs.map(getJobKey));
-      favoriteIds = new Set([...favoriteIds].filter((id) => validIds.has(id)));
-      saveFavoriteIds();
-      els.favoriteCount.textContent = favoriteIds.size;
-    }
-
-    function toggleFavorite(job) {
-      const key = getJobKey(job);
-      if (favoriteIds.has(key)) {
-        favoriteIds.delete(key);
-      } else {
-        favoriteIds.add(key);
-      }
-
-      saveFavoriteIds();
-      updateFavoriteCount();
-      renderJobs();
-      updateModalFavorite(job);
-    }
-
-    function setActiveView(view) {
-      activeView = view;
-      els.allJobsView.classList.toggle("active", view === "all");
-      els.recommendView.classList.toggle("active", view === "recommend");
-      els.favoritesView.classList.toggle("active", view === "favorites");
-      renderJobs();
-    }
-
-    function loadProfile() {
-      try {
-        return JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}") || {};
-      } catch (error) {
-        return {};
-      }
-    }
-
-    function saveProfileData() {
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-    }
-
-    function normalizeText(value) {
-      return String(value || "").trim().toLowerCase();
-    }
-
-    function splitTokens(value) {
-      return String(value || "")
-        .split(/[,，、/／;；|｜\s]+/)
-        .map((item) => item.trim())
-        .filter(Boolean);
-    }
-
-    function matchesCity(job, selectedCity) {
-      if (!selectedCity) return true;
-      return normalizeText(job.city).includes(normalizeText(selectedCity));
-    }
-
-    function degreeRank(value) {
-      const text = String(value || "");
-      if (text.includes("博士")) return 4;
-      if (text.includes("硕士") || text.includes("研究生")) return 3;
-      if (text.includes("本科")) return 2;
-      if (text.includes("专科") || text.includes("大专")) return 1;
-      return 0;
-    }
-
-    function matchesDegree(job, selectedDegree) {
-      if (!selectedDegree) return true;
-      const text = String(job.degree || "");
-      if (text.includes(selectedDegree)) return true;
-      const selectedBase = selectedDegree.replace("及以上", "");
-      if (selectedBase && text.includes(selectedBase)) return true;
-      if (selectedBase === "专科" && text.includes("大专")) return true;
-      const selectedRank = degreeRank(selectedDegree);
-      const jobRank = degreeRank(text);
-      if (!selectedRank || !jobRank) return normalizeText(text).includes(normalizeText(selectedDegree));
-      return jobRank <= selectedRank || text.includes("及以上") && selectedRank >= jobRank;
-    }
-
-    function getRecommendationScore(job) {
-      const intents = profile.intent || [];
-      if (!intents.length) return 0;
-
-      const haystack = [
-        job.role,
-        job.type,
-        job.major,
-        job.nature,
-        job.requirements.join(" "),
-        job.responsibilities.join(" ")
-      ].join(" ").toLowerCase();
-
-      let score = 0;
-      intents.forEach((intent) => {
-        const words = splitTokens(intent);
-        const intentText = normalizeText(intent);
-        if (intentText && haystack.includes(intentText)) score += 4;
-        words.forEach((word) => {
-          if (word.length >= 2 && haystack.includes(word.toLowerCase())) score += 1;
-        });
+      document.querySelectorAll("[data-nav-jump]").forEach((button) => {
+        button.addEventListener("click", () => switchView(button.dataset.navJump));
       });
 
-      const major = normalizeText(profile.major);
-      if (major && haystack.includes(major)) score += 2;
-      const graduation = String(profile.graduation || "");
-      if (graduation && String(job.target || "").includes(graduation)) score += 1;
-      return score;
-    }
-
-    function getRecommendedJobs(sourceJobs) {
-      if (!profile.intent || !profile.intent.length) return [];
-      return sourceJobs
-        .map((job) => ({ job, score: getRecommendationScore(job) }))
-        .filter((item) => item.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .map((item) => item.job);
-    }
-
-    function updateProfileCard() {
-      const hasProfile = !!profile.name || (profile.intent || []).length > 0;
-      els.profileCard.classList.toggle("visible", hasProfile);
-      if (!hasProfile) return;
-
-      const name = profile.name || "已登录用户";
-      const intents = (profile.intent || []).join("、") || "未填写意向岗位";
-      const school = profile.school ? ` · ${profile.school}` : "";
-      const major = profile.major ? ` · ${profile.major}` : "";
-      els.profileCardName.textContent = name;
-      els.profileCardSummary.textContent = `意向：${intents}${school}${major}`;
-    }
-
-    function fillProfileIntentOptions() {
-      const current = new Set(profile.intent || []);
-      const values = [...new Set([...FALLBACK_INTENTS, ...jobs.map((job) => job.type).filter(Boolean)])]
-        .sort((a, b) => a.localeCompare(b, "zh-CN"));
-      els.profileIntent.innerHTML = "";
-      values.forEach((value) => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        option.selected = current.has(value);
-        els.profileIntent.appendChild(option);
+      [els.keyword, els.city, els.nature, els.degree, els.status].forEach((item) => {
+        item.addEventListener("input", renderJobs);
+        item.addEventListener("change", renderJobs);
       });
-    }
+      els.resetFilters.addEventListener("click", resetFilters);
+      els.showRecommended.addEventListener("click", () => {
+        showingRecommended = !showingRecommended;
+        els.showRecommended.textContent = showingRecommended ? "显示全部岗位" : "为我推荐";
+        renderJobs();
+      });
 
-    function openProfileDialog() {
-      fillProfileIntentOptions();
-      els.profileName.value = profile.name || "";
-      els.profileAge.value = profile.age || "";
-      els.profileGender.value = profile.gender || "";
-      els.profileGraduation.value = profile.graduation || "";
-      els.profileSchool.value = profile.school || "";
-      els.profileMajor.value = profile.major || "";
-      els.profileCampus.value = profile.campus || "";
-      els.profileExperience.value = profile.experience || "";
-      els.profileDialog.showModal();
-    }
+      els.intentInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === "，" || event.key === ",") {
+          event.preventDefault();
+          addIntent(els.intentInput.value);
+        }
+      });
+      els.intentInput.addEventListener("blur", () => addIntent(els.intentInput.value));
+      els.saveProfile.addEventListener("click", saveProfileFromForm);
+      els.clearProfile.addEventListener("click", clearProfile);
 
-    function closeProfileDialog() {
-      els.profileDialog.close();
-    }
+      els.closeDialog.addEventListener("click", closeJob);
+      els.closeFooter.addEventListener("click", closeJob);
+      els.jobDialog.addEventListener("click", (event) => {
+        if (event.target === els.jobDialog) closeJob();
+      });
 
-    function saveProfileFromForm() {
-      profile = {
-        name: els.profileName.value.trim(),
-        age: els.profileAge.value.trim(),
-        gender: els.profileGender.value,
-        graduation: els.profileGraduation.value,
-        school: els.profileSchool.value.trim(),
-        major: els.profileMajor.value.trim(),
-        intent: [...els.profileIntent.selectedOptions].map((option) => option.value),
-        campus: els.profileCampus.value.trim(),
-        experience: els.profileExperience.value.trim()
-      };
-      saveProfileData();
-      updateProfileCard();
-      closeProfileDialog();
-      setActiveView("recommend");
-    }
-
-    function clearProfileData() {
-      profile = {};
-      localStorage.removeItem(PROFILE_KEY);
-      updateProfileCard();
-      closeProfileDialog();
-      if (activeView === "recommend") setActiveView("all");
-    }
-
-    function normalizeJob(raw, index) {
-      const deadline = raw.deadline || raw["截止时间"] || "";
-      const today = new Date().toISOString().slice(0, 10);
-      const autoStatus = deadline && deadline < today ? "已截止" : "可投递";
-
-      return {
-        id: raw.id || raw.record_id || index + 1,
-        company: raw.company || raw["企业名称"] || "未填写企业",
-        nature: raw.nature || raw["企业性质"] || "未公开",
-        role: raw.role || raw["工作岗位"] || raw["岗位名称"] || "未填写岗位",
-        type: raw.type || raw["岗位类型"] || "未分类",
-        city: raw.city || raw["工作地点"] || raw["城市"] || "未公开",
-        degree: raw.degree || raw["学历要求"] || "未公开",
-        major: raw.major || raw["专业要求"] || "未公开",
-        target: raw.target || raw["招聘对象"] || "应届生",
-        deadline,
-        status: raw.status || raw["投递状态"] || autoStatus,
-        salary: raw.salary || raw["薪资范围"] || raw["薪资与福利"] || "未公开",
-        source: raw.source || raw["信息来源"] || "待核验来源",
-        updated: raw.updated || raw["更新时间"] || today,
-        link: raw.link || raw["官方投递网页"] || raw["官方投递链接"] || "#",
-        responsibilities: Array.isArray(raw.responsibilities)
-          ? raw.responsibilities
-          : String(raw.responsibilities || raw["岗位职责"] || "未公开").split(/\n|；|;/).filter(Boolean),
-        requirements: Array.isArray(raw.requirements)
-          ? raw.requirements
-          : String(raw.requirements || raw["任职要求"] || "未公开").split(/\n|；|;/).filter(Boolean)
-      };
+      els.addTodayTodo.addEventListener("click", () => openTodoDialog(selectedTodoDate));
+      els.closeTodo.addEventListener("click", closeTodo);
+      els.cancelTodo.addEventListener("click", closeTodo);
+      els.saveTodo.addEventListener("click", saveTodo);
     }
 
     async function loadExternalJobs() {
@@ -1552,20 +1281,152 @@
         const records = Array.isArray(payload) ? payload : payload.jobs;
         if (!Array.isArray(records)) throw new Error("invalid data shape");
         jobs = records.map(normalizeJob);
-        els.syncStatus.textContent = `数据源：已加载外部岗位数据，共 ${jobs.length} 条。`;
+        els.syncStatus.textContent = `数据源：已加载飞书岗位数据，共 ${jobs.length} 条。`;
       } catch (error) {
+        jobs = fallbackJobs;
         els.syncStatus.textContent = "数据源：暂未连接飞书同步，当前展示示例数据。";
       }
     }
 
-    function makeTags(job) {
-      return [job.nature, job.type, job.degree, job.target, job.major]
-        .map((tag) => `<span class="tag">${tag}</span>`)
-        .join("");
+    function normalizeJob(raw, index) {
+      const today = todayString();
+      const deadline = raw.deadline || raw["截止时间"] || "";
+      return {
+        id: raw.id || raw.record_id || index + 1,
+        company: raw.company || raw["企业名称"] || raw["公司名称"] || "未填写企业",
+        nature: raw.nature || raw["企业性质"] || "未公开",
+        role: raw.role || raw["招聘岗位"] || raw["工作岗位"] || raw["岗位名称"] || "未填写岗位",
+        type: raw.type || raw["岗位类型"] || raw["行业分类"] || "未分类",
+        city: raw.city || raw["工作地点"] || raw["城市"] || "未公开",
+        degree: raw.degree || raw["学历要求"] || "未公开",
+        major: raw.major || raw["专业要求"] || "未公开",
+        target: raw.target || raw["届次"] || raw["招聘对象"] || "应届生",
+        deadline,
+        status: raw.status || raw["投递状态"] || autoStatus(deadline, today),
+        salary: raw.salary || raw["薪资范围"] || raw["薪资与福利"] || "未公开",
+        source: raw.source || raw["公告来源"] || raw["信息来源"] || "待核验来源",
+        updated: raw.updated || raw["更新时间"] || today,
+        link: raw.link || raw["投递链接"] || raw["官方投递链接"] || raw["官方投递网页"] || "#",
+        responsibilities: toList(raw.responsibilities || raw["岗位职责"] || "未公开"),
+        requirements: toList(raw.requirements || raw["任职要求"] || raw["岗位要求"] || "未公开")
+      };
+    }
+
+    function switchView(view) {
+      activeView = view;
+      document.querySelectorAll(".view").forEach((section) => section.classList.remove("active"));
+      document.querySelector(`#${view}View`).classList.add("active");
+      document.querySelectorAll("[data-nav]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.nav === view);
+      });
+      const [title, subtitle] = viewCopy[view];
+      els.viewTitle.textContent = title;
+      els.viewSubtitle.textContent = subtitle;
+      renderAll();
+    }
+
+    function renderAll() {
+      updateMetrics();
+      renderProfileSummary();
+      renderCalendar();
+      renderTodoList();
+      renderJobs();
+      renderSavedLists();
+      renderHomeRecommended();
+    }
+
+    function updateMetrics() {
+      const today = todayString();
+      els.metricToday.textContent = jobs.filter((job) => job.updated === today).length;
+      els.metricTotal.textContent = jobs.length;
+      els.metricFavorites.textContent = favoriteIds.size;
+      els.metricApplied.textContent = appliedIds.size;
+    }
+
+    function renderProfileSummary() {
+      const items = [
+        ["姓名", profile.name || "未填写"],
+        ["学校", profile.school || "未填写"],
+        ["专业", profile.major || "未填写"],
+        ["毕业年份", profile.graduation || "未填写"],
+        ["意向岗位", (profile.intents || []).join("、") || "未填写"],
+        ["经历", profile.experience ? "已填写" : "未填写"]
+      ];
+      els.profileSummary.innerHTML = items.map(([label, value]) => `
+        <div class="summary-item">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderHomeRecommended() {
+      const list = getRecommendedJobs(jobs).slice(0, 5);
+      els.homeRecommended.innerHTML = list.length
+        ? list.map((job) => miniJobCard(job)).join("")
+        : `<div class="empty">填写个人信息里的意向岗位后，这里会出现推荐岗位。</div>`;
+      bindMiniCards(els.homeRecommended);
+    }
+
+    function renderJobs() {
+      const source = showingRecommended ? getRecommendedJobs(jobs) : jobs;
+      const filtered = source.filter(jobMatches);
+      const visible = filtered.slice(0, MAX_RENDERED_JOBS);
+      els.jobsBody.innerHTML = "";
+      els.mobileList.innerHTML = "";
+      els.emptyTable.hidden = filtered.length > 0;
+      els.resultCount.textContent = filtered.length > MAX_RENDERED_JOBS
+        ? `正在显示前 ${MAX_RENDERED_JOBS} 个岗位，共 ${filtered.length} 个匹配结果`
+        : `正在显示 ${filtered.length} 个岗位`;
+
+      visible.forEach((job) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>
+            <div class="company clamp two">${escapeHtml(job.company)}</div>
+            <div class="muted clamp two">${escapeHtml(job.nature)}</div>
+          </td>
+          <td>
+            <div class="role">${escapeHtml(job.role)}</div>
+            <div class="tagline">${makeTags(job)}</div>
+          </td>
+          <td><div class="clamp four">${escapeHtml(job.city)}</div></td>
+          <td>
+            <div class="clamp two">${escapeHtml(job.degree)}</div>
+            <div class="muted clamp three">${escapeHtml(job.major)}</div>
+          </td>
+          <td>
+            <div>${escapeHtml(job.deadline || "未公开")}</div>
+            <div style="margin-top: 8px;">${makeStatus(job.status)}</div>
+          </td>
+          <td>${jobActions(job)}</td>
+        `;
+        tr.addEventListener("click", () => openJob(job));
+        els.jobsBody.appendChild(tr);
+
+        const card = document.createElement("article");
+        card.className = "job-card";
+        card.innerHTML = `
+          <div class="card-head">
+            <div>
+              <div class="company">${escapeHtml(job.company)}</div>
+              <div class="role">${escapeHtml(job.role)}</div>
+            </div>
+            ${makeStatus(job.status)}
+          </div>
+          <div class="muted">${escapeHtml(job.city)} · ${escapeHtml(job.degree)}</div>
+          <div class="tagline">${makeTags(job)}</div>
+          <div class="card-actions">${jobActions(job)}</div>
+        `;
+        card.addEventListener("click", () => openJob(job));
+        els.mobileList.appendChild(card);
+      });
+
+      bindActionButtons(document);
     }
 
     function jobMatches(job) {
-      const keyword = els.keyword.value.trim().toLowerCase();
+      const keyword = normalizeText(els.keyword.value);
       const searchable = [
         job.company,
         job.role,
@@ -1582,112 +1443,77 @@
       if (keyword && !searchable.includes(keyword)) return false;
       if (!matchesCity(job, els.city.value)) return false;
       if (!matchesDegree(job, els.degree.value)) return false;
-      return ["nature", "type", "status"].every((field) => !els[field].value || job[field] === els[field].value);
+      if (els.nature.value && job.nature !== els.nature.value) return false;
+      if (els.status.value && job.status !== els.status.value) return false;
+      return true;
     }
 
-    function renderJobs() {
-      let baseJobs = jobs;
-      if (activeView === "favorites") baseJobs = jobs.filter(isFavorite);
-      if (activeView === "recommend") baseJobs = getRecommendedJobs(jobs);
-      const filtered = baseJobs.filter(jobMatches);
-      const visibleJobs = filtered.slice(0, MAX_RENDERED_JOBS);
-      els.jobsBody.innerHTML = "";
-      els.mobileList.innerHTML = "";
-      els.emptyTable.hidden = filtered.length > 0;
-      els.emptyTable.textContent = activeView === "favorites"
-        ? "还没有收藏的岗位，回到全部岗位里收藏几个感兴趣的机会吧。"
-        : activeView === "recommend"
-        ? "还没有推荐结果，先填写个人档案里的意向岗位，或者换一个筛选条件。"
-        : "没有匹配的岗位，换一个筛选条件试试。";
-      els.resultCount.textContent = filtered.length > MAX_RENDERED_JOBS
-        ? `正在显示前 ${MAX_RENDERED_JOBS} 个岗位，共 ${filtered.length} 个匹配结果`
-        : `正在显示 ${filtered.length} 个岗位`;
+    function renderSavedLists() {
+      const favorites = jobs.filter(isFavorite);
+      const applied = jobs.filter(isApplied);
+      els.favoriteList.innerHTML = favorites.length
+        ? favorites.map((job) => miniJobCard(job)).join("")
+        : `<div class="empty">还没有收藏岗位。</div>`;
+      els.appliedList.innerHTML = applied.length
+        ? applied.map((job) => miniJobCard(job, true)).join("")
+        : `<div class="empty">还没有标记已投递岗位。</div>`;
+      bindMiniCards(els.favoriteList);
+      bindMiniCards(els.appliedList);
+    }
 
-      visibleJobs.forEach((job) => {
-        const tr = document.createElement("tr");
-        tr.tabIndex = 0;
-        tr.innerHTML = `
-          <td>
-            <div class="company">${job.company}</div>
-            <div class="muted">${job.nature}</div>
-          </td>
-          <td>
-            <div class="role">${job.role}</div>
-            <div class="tagline">${makeTags(job)}</div>
-          </td>
-          <td>${job.city}</td>
-          <td>
-            <div>${job.degree}</div>
-            <div class="muted">${job.major}</div>
-          </td>
-          <td>
-            <div>${job.deadline}</div>
-            <div style="margin-top: 8px;">${makeStatus(job.status)}</div>
-          </td>
-          <td>
-            <div class="row-actions">
-              <button class="${favoriteClass(job)}" type="button" data-favorite-id="${getJobKey(job)}">${favoriteLabel(job)}</button>
-              <a class="apply" href="${job.link}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">官方投递</a>
-            </div>
-          </td>
-        `;
-        tr.addEventListener("click", () => openJob(job));
-        tr.addEventListener("keydown", (event) => {
-          if (event.key === "Enter") openJob(job);
-        });
-        tr.querySelector("[data-favorite-id]").addEventListener("click", (event) => {
-          event.stopPropagation();
-          toggleFavorite(job);
-        });
-        els.jobsBody.appendChild(tr);
-
-        const card = document.createElement("article");
-        card.className = "job-card";
-        card.tabIndex = 0;
-        card.innerHTML = `
-          <div class="card-head">
-            <div>
-              <div class="company">${job.company}</div>
-              <div class="role">${job.role}</div>
-            </div>
-            ${makeStatus(job.status)}
-          </div>
-          <div class="muted">${job.city} · ${job.degree} · ${job.major}</div>
+    function miniJobCard(job, showAppliedDate = false) {
+      const applied = getAppliedMeta(job);
+      return `
+        <article class="mini-card" data-open-job="${escapeAttr(getJobKey(job))}">
+          <h4 class="clamp two">${escapeHtml(job.role)}</h4>
+          <div class="muted">${escapeHtml(job.company)} · ${escapeHtml(job.city)}</div>
           <div class="tagline">${makeTags(job)}</div>
-          <div class="card-actions">
-            <span class="muted">截止 ${job.deadline}</span>
-            <div class="card-buttons">
-              <button class="${favoriteClass(job)}" type="button" data-favorite-id="${getJobKey(job)}">${favoriteLabel(job)}</button>
-              <a class="apply" href="${job.link}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">官方投递</a>
-            </div>
-          </div>
-        `;
-        card.addEventListener("click", () => openJob(job));
-        card.addEventListener("keydown", (event) => {
-          if (event.key === "Enter") openJob(job);
+          ${showAppliedDate && applied ? `<div class="muted" style="margin-top:8px;">投递日期：${escapeHtml(applied.date)}</div>` : ""}
+        </article>
+      `;
+    }
+
+    function bindMiniCards(container) {
+      container.querySelectorAll("[data-open-job]").forEach((card) => {
+        card.addEventListener("click", () => {
+          const job = jobs.find((item) => getJobKey(item) === card.dataset.openJob);
+          if (job) openJob(job);
         });
-        card.querySelector("[data-favorite-id]").addEventListener("click", (event) => {
-          event.stopPropagation();
-          toggleFavorite(job);
-        });
-        els.mobileList.appendChild(card);
       });
     }
 
-    function setList(list, values) {
-      list.innerHTML = values.map((value) => `<li>${value}</li>`).join("");
+    function jobActions(job) {
+      const key = escapeAttr(getJobKey(job));
+      return `
+        <div class="btn-row">
+          <button class="btn ${isFavorite(job) ? "saved" : ""}" type="button" data-favorite="${key}">${isFavorite(job) ? "已收藏" : "收藏"}</button>
+          <button class="btn ${isApplied(job) ? "pink" : ""}" type="button" data-applied="${key}">${isApplied(job) ? "已投递" : "标记投递"}</button>
+          <a class="btn green" href="${escapeAttr(job.link)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">官方投递</a>
+        </div>
+      `;
     }
 
-    function updateModalFavorite(job) {
-      els.modalFavorite.textContent = favoriteLabel(job);
-      els.modalFavorite.className = favoriteClass(job);
-      els.modalFavorite.onclick = () => toggleFavorite(job);
+    function bindActionButtons(root) {
+      root.querySelectorAll("[data-favorite]").forEach((button) => {
+        button.onclick = (event) => {
+          event.stopPropagation();
+          const job = jobs.find((item) => getJobKey(item) === button.dataset.favorite);
+          if (job) toggleFavorite(job);
+        };
+      });
+      root.querySelectorAll("[data-applied]").forEach((button) => {
+        button.onclick = (event) => {
+          event.stopPropagation();
+          const job = jobs.find((item) => getJobKey(item) === button.dataset.applied);
+          if (job) toggleApplied(job);
+        };
+      });
     }
 
     function openJob(job) {
       els.modalCompany.textContent = job.company;
       els.modalRole.textContent = job.role;
-      els.modalTags.innerHTML = `${makeStatus(job.status)}${makeTags(job)}`;
+      els.modalTags.innerHTML = makeTags(job);
       els.modalDetails.innerHTML = [
         ["工作地点", job.city],
         ["企业性质", job.nature],
@@ -1695,13 +1521,13 @@
         ["学历要求", job.degree],
         ["专业要求", job.major],
         ["招聘对象", job.target],
-        ["截止时间", job.deadline],
+        ["截止时间", job.deadline || "未公开"],
         ["更新时间", job.updated],
         ["投递状态", job.status]
       ].map(([label, value]) => `
         <div class="detail">
-          <span>${label}</span>
-          <strong>${value}</strong>
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
         </div>
       `).join("");
       setList(els.modalResponsibilities, job.responsibilities);
@@ -1709,71 +1535,392 @@
       els.modalSalary.textContent = job.salary;
       els.modalSource.textContent = `${job.source}，最后更新时间：${job.updated}`;
       els.modalApply.href = job.link;
-      updateModalFavorite(job);
-      els.dialog.showModal();
+      els.modalFavorite.textContent = isFavorite(job) ? "已收藏" : "收藏岗位";
+      els.modalFavorite.className = isFavorite(job) ? "btn saved" : "btn";
+      els.modalApplied.textContent = isApplied(job) ? "已投递" : "标记已投递";
+      els.modalApplied.className = isApplied(job) ? "btn pink" : "btn pink";
+      els.modalFavorite.onclick = () => toggleFavorite(job);
+      els.modalApplied.onclick = () => toggleApplied(job);
+      els.jobDialog.showModal();
     }
 
     function closeJob() {
-      els.dialog.close();
+      els.jobDialog.close();
     }
 
     function resetFilters() {
       els.keyword.value = "";
-      filterFields.forEach((field) => {
-        els[field].value = "";
-      });
+      els.city.value = "";
+      els.nature.value = "";
+      els.degree.value = "";
+      els.status.value = "";
+      showingRecommended = false;
+      els.showRecommended.textContent = "为我推荐";
       renderJobs();
     }
 
     function rebuildFilters() {
-      fillSelect(els.city, uniqueCityValues());
       fillSelect(els.nature, uniqueValues("nature"));
-      fillSelect(els.type, uniqueValues("type"));
-      fillSelect(els.degree, DEGREE_OPTIONS);
       fillSelect(els.status, uniqueValues("status"));
-
-      els.metricTotal.textContent = jobs.length;
-      els.metricOpen.textContent = jobs.filter((job) => job.status === "可投递").length;
-      els.metricSoon.textContent = jobs.filter((job) => job.status === "即将截止").length;
-      updateFavoriteCount();
-      fillProfileIntentOptions();
-      updateProfileCard();
     }
 
-    async function init() {
-      els.keyword.addEventListener("input", renderJobs);
-      filterFields.forEach((field) => els[field].addEventListener("change", renderJobs));
-      els.resetFilters.addEventListener("click", resetFilters);
-      els.allJobsView.addEventListener("click", () => setActiveView("all"));
-      els.recommendView.addEventListener("click", () => {
-        if (!profile.intent || !profile.intent.length) {
-          openProfileDialog();
-          return;
-        }
-        setActiveView("recommend");
+    function fillSelect(select, values) {
+      select.querySelectorAll("option:not(:first-child)").forEach((option) => option.remove());
+      values.forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
       });
-      els.favoritesView.addEventListener("click", () => setActiveView("favorites"));
-      els.openProfile.addEventListener("click", openProfileDialog);
-      els.editProfile.addEventListener("click", openProfileDialog);
-      els.closeDialog.addEventListener("click", closeJob);
-      els.closeFooter.addEventListener("click", closeJob);
-      els.closeProfile.addEventListener("click", closeProfileDialog);
-      els.cancelProfile.addEventListener("click", closeProfileDialog);
-      els.saveProfile.addEventListener("click", saveProfileFromForm);
-      els.clearProfile.addEventListener("click", clearProfileData);
-      els.dialog.addEventListener("click", (event) => {
-        if (event.target === els.dialog) closeJob();
-      });
-      els.profileDialog.addEventListener("click", (event) => {
-        if (event.target === els.profileDialog) closeProfileDialog();
-      });
-
-      await loadExternalJobs();
-      rebuildFilters();
-      renderJobs();
     }
 
-    init();
+    function uniqueValues(key) {
+      return [...new Set(jobs.map((job) => job[key]).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, "zh-CN"));
+    }
+
+    function toggleFavorite(job) {
+      const key = getJobKey(job);
+      if (favoriteIds.has(key)) favoriteIds.delete(key);
+      else favoriteIds.add(key);
+      saveSet(FAVORITES_KEY, favoriteIds);
+      renderAll();
+      if (els.jobDialog.open) openJob(job);
+    }
+
+    function toggleApplied(job) {
+      const key = getJobKey(job);
+      if (appliedIds.has(key)) {
+        appliedIds.delete(key);
+        const meta = loadObject(`${APPLIED_KEY}:meta`);
+        delete meta[key];
+        localStorage.setItem(`${APPLIED_KEY}:meta`, JSON.stringify(meta));
+      } else {
+        appliedIds.add(key);
+        const meta = loadObject(`${APPLIED_KEY}:meta`);
+        meta[key] = { date: todayString(), note: "" };
+        localStorage.setItem(`${APPLIED_KEY}:meta`, JSON.stringify(meta));
+      }
+      saveSet(APPLIED_KEY, appliedIds);
+      renderAll();
+      if (els.jobDialog.open) openJob(job);
+    }
+
+    function isFavorite(job) {
+      return favoriteIds.has(getJobKey(job));
+    }
+
+    function isApplied(job) {
+      return appliedIds.has(getJobKey(job));
+    }
+
+    function getAppliedMeta(job) {
+      return loadObject(`${APPLIED_KEY}:meta`)[getJobKey(job)];
+    }
+
+    function fillProfileForm() {
+      els.profileName.value = profile.name || "";
+      els.profileAge.value = profile.age || "";
+      els.profileGender.value = profile.gender || "";
+      els.profileGraduation.value = profile.graduation || "";
+      els.profileSchool.value = profile.school || "";
+      els.profileMajor.value = profile.major || "";
+      els.profileCampus.value = profile.campus || "";
+      els.profileExperience.value = profile.experience || "";
+    }
+
+    function saveProfileFromForm() {
+      profile = {
+        name: els.profileName.value.trim(),
+        age: els.profileAge.value.trim(),
+        gender: els.profileGender.value,
+        graduation: els.profileGraduation.value.trim(),
+        school: els.profileSchool.value.trim(),
+        major: els.profileMajor.value.trim(),
+        intents: profile.intents || [],
+        campus: els.profileCampus.value.trim(),
+        experience: els.profileExperience.value.trim()
+      };
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      renderAll();
+      switchView("home");
+    }
+
+    function clearProfile() {
+      profile = {};
+      localStorage.removeItem(PROFILE_KEY);
+      fillProfileForm();
+      renderIntentChips();
+      renderAll();
+    }
+
+    function addIntent(value) {
+      const text = value.trim();
+      if (!text) return;
+      profile.intents = profile.intents || [];
+      if (!profile.intents.includes(text)) profile.intents.push(text);
+      els.intentInput.value = "";
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      renderIntentChips();
+      renderAll();
+    }
+
+    function removeIntent(index) {
+      profile.intents = profile.intents || [];
+      profile.intents.splice(index, 1);
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      renderIntentChips();
+      renderAll();
+    }
+
+    function renderIntentChips() {
+      els.intentChips.querySelectorAll(".chip").forEach((chip) => chip.remove());
+      (profile.intents || []).forEach((intent, index) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.innerHTML = `${escapeHtml(intent)}<button type="button" aria-label="删除">×</button>`;
+        chip.querySelector("button").addEventListener("click", () => removeIntent(index));
+        els.intentChips.insertBefore(chip, els.intentInput);
+      });
+    }
+
+    function getRecommendedJobs(source) {
+      const intents = profile.intents || [];
+      if (!intents.length) return [];
+      return source
+        .map((job) => ({ job, score: recommendationScore(job, intents) }))
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map((item) => item.job);
+    }
+
+    function recommendationScore(job, intents) {
+      const haystack = [
+        job.role,
+        job.type,
+        job.major,
+        job.nature,
+        job.city,
+        job.requirements.join(" "),
+        job.responsibilities.join(" ")
+      ].join(" ").toLowerCase();
+      let score = 0;
+      intents.forEach((intent, index) => {
+        const weight = Math.max(1, intents.length - index);
+        const text = normalizeText(intent);
+        if (text && haystack.includes(text)) score += weight * 6;
+        splitTokens(intent).forEach((word) => {
+          if (word.length >= 2 && haystack.includes(word.toLowerCase())) score += weight;
+        });
+      });
+      const major = normalizeText(profile.major);
+      if (major && haystack.includes(major)) score += 2;
+      const graduation = String(profile.graduation || "");
+      if (graduation && String(job.target || "").includes(graduation)) score += 1;
+      return score;
+    }
+
+    function renderCalendar() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      els.calendarMonth.textContent = `${year}年${month + 1}月`;
+      const first = new Date(year, month, 1);
+      const startDay = first.getDay();
+      const days = new Date(year, month + 1, 0).getDate();
+      const cells = [];
+      for (let i = 0; i < startDay; i += 1) cells.push("");
+      for (let day = 1; day <= days; day += 1) {
+        const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        cells.push(date);
+      }
+      els.calendarGrid.innerHTML = cells.map((date) => {
+        if (!date) return `<div></div>`;
+        const dayTodos = todos[date] || [];
+        const done = dayTodos.filter((todo) => todo.done).length;
+        return `
+          <button class="day ${date === todayString() ? "today" : ""}" type="button" data-date="${date}">
+            <div class="day-num"><span>${Number(date.slice(-2))}</span><span>${dayTodos.length}</span></div>
+            <div class="dots">
+              ${dayTodos.map((todo) => `<span class="dot ${todo.done ? "done" : ""}"></span>`).join("")}
+            </div>
+          </button>
+        `;
+      }).join("");
+      els.calendarGrid.querySelectorAll("[data-date]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedTodoDate = button.dataset.date;
+          renderTodoList();
+          openTodoDialog(selectedTodoDate);
+        });
+      });
+    }
+
+    function renderTodoList() {
+      const list = todos[selectedTodoDate] || [];
+      els.todoTitle.textContent = `${selectedTodoDate} 待办`;
+      els.todoList.innerHTML = list.length
+        ? list.map((todo, index) => `
+          <div class="todo ${todo.done ? "done" : ""}">
+            <input type="checkbox" ${todo.done ? "checked" : ""} data-todo-toggle="${index}">
+            <span>${escapeHtml(todo.text)}</span>
+            <button class="btn" type="button" data-todo-delete="${index}">删除</button>
+          </div>
+        `).join("")
+        : `<div class="empty">这一天还没有待办。</div>`;
+      els.todoList.querySelectorAll("[data-todo-toggle]").forEach((input) => {
+        input.addEventListener("change", () => {
+          todos[selectedTodoDate][Number(input.dataset.todoToggle)].done = input.checked;
+          saveTodos();
+          renderAll();
+        });
+      });
+      els.todoList.querySelectorAll("[data-todo-delete]").forEach((button) => {
+        button.addEventListener("click", () => {
+          todos[selectedTodoDate].splice(Number(button.dataset.todoDelete), 1);
+          saveTodos();
+          renderAll();
+        });
+      });
+    }
+
+    function openTodoDialog(date) {
+      selectedTodoDate = date;
+      els.todoDateLabel.textContent = date;
+      els.todoText.value = "";
+      els.todoDialog.showModal();
+    }
+
+    function closeTodo() {
+      els.todoDialog.close();
+    }
+
+    function saveTodo() {
+      const text = els.todoText.value.trim();
+      if (!text) return;
+      todos[selectedTodoDate] = todos[selectedTodoDate] || [];
+      todos[selectedTodoDate].push({ text, done: false });
+      saveTodos();
+      closeTodo();
+      renderAll();
+    }
+
+    function saveTodos() {
+      localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+    }
+
+    function makeTags(job) {
+      return [job.nature, job.type, job.degree, job.target]
+        .filter(Boolean)
+        .slice(0, 5)
+        .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`)
+        .join("");
+    }
+
+    function makeStatus(status) {
+      return `<span class="status ${statusClass[status] || "open"}">${escapeHtml(status)}</span>`;
+    }
+
+    function matchesCity(job, value) {
+      const city = normalizeText(value);
+      if (!city) return true;
+      const jobCity = normalizeText(job.city);
+      if (city === "全国") return jobCity.includes("全国") || jobCity.includes("多地");
+      if (city === "远程") return jobCity.includes("远程") || jobCity.includes("线上");
+      return jobCity.includes(city);
+    }
+
+    function matchesDegree(job, selectedDegree) {
+      if (!selectedDegree) return true;
+      const text = String(job.degree || "");
+      if (text.includes(selectedDegree)) return true;
+      const base = selectedDegree.replace("及以上", "");
+      if (base && text.includes(base)) return true;
+      if (base === "专科" && text.includes("大专")) return true;
+      const selectedRank = degreeRank(selectedDegree);
+      const jobRank = degreeRank(text);
+      if (!selectedRank || !jobRank) return normalizeText(text).includes(normalizeText(selectedDegree));
+      return jobRank <= selectedRank || (text.includes("及以上") && selectedRank >= jobRank);
+    }
+
+    function degreeRank(value) {
+      const text = String(value || "");
+      if (text.includes("博士")) return 4;
+      if (text.includes("硕士") || text.includes("研究生")) return 3;
+      if (text.includes("本科")) return 2;
+      if (text.includes("专科") || text.includes("大专")) return 1;
+      return 0;
+    }
+
+    function autoStatus(deadline, today) {
+      if (deadline && /^\d{4}-\d{2}-\d{2}$/.test(deadline) && deadline < today) return "已截止";
+      return "可投递";
+    }
+
+    function getJobKey(job) {
+      return String(job.id || job.link || `${job.company}-${job.role}-${job.city}`);
+    }
+
+    function setList(list, values) {
+      list.innerHTML = values.map((value) => `<li>${escapeHtml(value)}</li>`).join("");
+    }
+
+    function toList(value) {
+      if (Array.isArray(value)) return value.map(String).filter(Boolean);
+      return String(value || "")
+        .split(/\r?\n|；|;/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    function splitTokens(value) {
+      return String(value || "")
+        .split(/[,，、/／;；|｜\s]+/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    function normalizeText(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function todayString() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function loadSet(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return new Set(Array.isArray(value) ? value : []);
+      } catch (error) {
+        return new Set();
+      }
+    }
+
+    function saveSet(key, value) {
+      localStorage.setItem(key, JSON.stringify([...value]));
+    }
+
+    function loadObject(key) {
+      try {
+        return JSON.parse(localStorage.getItem(key) || "{}") || {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value);
+    }
   </script>
 </body>
 </html>
