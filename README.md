@@ -40,6 +40,31 @@ FEISHU_MAX_RECORDS=2000
 
 不要把 `FEISHU_APP_SECRET` 写进 GitHub。它只能放在 Cloudflare Pages 的环境变量里。
 
+## 自动定时更新
+
+项目包含 GitHub Actions 定时任务：
+
+```text
+.github/workflows/refresh-cloudflare.yml
+```
+
+它会每天 08:00（北京时间）触发一次 Cloudflare Pages 重新部署，从飞书重新同步岗位数据。
+
+启用步骤：
+
+1. 进入 Cloudflare Pages 项目。
+2. 打开 `Settings` -> `Builds & deployments`。
+3. 找到 `Deploy hooks`，新建一个 Hook。
+4. 复制 Hook URL。
+5. 进入 GitHub 仓库 `Settings` -> `Secrets and variables` -> `Actions`。
+6. 新建 Repository secret：
+
+```text
+CLOUDFLARE_DEPLOY_HOOK_URL=你的 Cloudflare Deploy Hook URL
+```
+
+也可以在 GitHub 的 `Actions` 页面手动运行 `Refresh Cloudflare Pages`，立刻触发一次更新。
+
 ## 数据流程
 
 ```text
