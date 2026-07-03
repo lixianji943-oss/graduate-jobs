@@ -1317,40 +1317,9 @@
         <section class="panel">
           <div class="panel-head">
             <h3>待发布岗位 / 往年发布参考</h3>
-            <button class="btn primary" id="saveWatchItem" type="button">保存跟踪</button>
+            <span class="tag" id="watchFollowCount">已关注 0 个</span>
           </div>
-          <div class="interview-grid">
-            <div class="field">
-              <label for="watchCompany">企业名称</label>
-              <input id="watchCompany" type="text" placeholder="例如：腾讯、字节跳动、国家电网">
-            </div>
-            <div class="field">
-              <label for="watchRole">岗位方向</label>
-              <input id="watchRole" type="text" placeholder="例如：产品经理、管培生、暑期实习">
-            </div>
-            <div class="field">
-              <label for="watchLastDate">往年发布时间</label>
-              <input id="watchLastDate" type="text" placeholder="例如：2025-08-12 或 8月中旬">
-            </div>
-            <div class="field">
-              <label for="watchWindow">预计关注窗口</label>
-              <input id="watchWindow" type="text" placeholder="例如：7月底-8月中旬">
-            </div>
-            <div class="field">
-              <label for="watchLink">官网 / 往年链接</label>
-              <input id="watchLink" type="url" placeholder="https://">
-            </div>
-            <div class="field">
-              <label for="watchStatus">跟踪状态</label>
-              <select id="watchStatus">
-                <option value="待跟踪">待跟踪</option>
-                <option value="已检查">已检查</option>
-                <option value="今年已发布">今年已发布</option>
-                <option value="暂未找到">暂未找到</option>
-              </select>
-            </div>
-          </div>
-          <div class="profile-help" style="margin-top: 14px;">这里记录的是往年官方发布节奏和今年需要检查的企业，不代表岗位一定发布。</div>
+          <div class="profile-help" style="margin-top: 14px;">这里由网站整理往年官方招聘节奏，帮助大家提前关注可能即将开放的企业。时间仅作提醒参考，不代表今年一定发布；投递请以企业官方页面为准。</div>
           <div class="card-list" id="watchList" style="margin-top: 14px;"></div>
         </section>
       </section>
@@ -1520,7 +1489,7 @@
     const PROFILE_KEY = "graduateJobProfile";
     const TODOS_KEY = "graduateJobTodos";
     const USER_JOBS_KEY = "graduateJobUserJobs";
-    const WATCHLIST_KEY = "graduateJobWatchlist";
+    const WATCHLIST_KEY = "graduateJobWatchlistFollows";
 
     let jobs = [];
     let activeView = "home";
@@ -1530,7 +1499,7 @@
     let profile = loadObject(PROFILE_KEY);
     let todos = loadObject(TODOS_KEY);
     let userJobs = loadArray(USER_JOBS_KEY).map(normalizeJob);
-    let watchlist = loadArray(WATCHLIST_KEY);
+    let watchlist = new Set([...loadSet(WATCHLIST_KEY)].filter((id) => typeof id === "string"));
     let selectedTodoDate = todayString();
 
     const fallbackJobs = [
@@ -1563,6 +1532,129 @@
       ["今天的认真会被看见", "把经历写具体，把目标写清楚，机会就更容易认出你。"],
       ["先赢下一小步", "一个待办、一次复盘、一条投递记录，都会慢慢攒成底气。"],
       ["保持节奏，比爆发更重要", "求职不是一天跑完的路，稳定推进就已经很厉害。"]
+    ];
+
+    const publicWatchlist = [
+      {
+        id: "watch-tencent-campus",
+        company: "腾讯",
+        role: "技术、产品、设计、市场、职能等校招",
+        lastDate: "往年多集中在 8 月前后启动秋招",
+        window: "7 月下旬-8 月中旬",
+        status: "重点关注",
+        link: "https://join.qq.com/",
+        note: "适合提前准备笔试、项目复盘和岗位方向筛选。"
+      },
+      {
+        id: "watch-bytedance-campus",
+        company: "字节跳动",
+        role: "研发、产品、运营、商业化、设计等校招/实习",
+        lastDate: "往年暑期到秋招阶段陆续开放",
+        window: "7 月-9 月",
+        status: "重点关注",
+        link: "https://jobs.bytedance.com/campus",
+        note: "岗位批次和城市变化较快，建议每周检查官网。"
+      },
+      {
+        id: "watch-alibaba-campus",
+        company: "阿里巴巴",
+        role: "技术、产品、算法、运营、设计等校招",
+        lastDate: "往年秋招提前批/正式批常在暑期前后出现",
+        window: "7 月下旬-9 月",
+        status: "重点关注",
+        link: "https://campus.alibaba.com/",
+        note: "可重点关注提前批和正式批入口是否开放。"
+      },
+      {
+        id: "watch-meituan-campus",
+        company: "美团",
+        role: "技术、产品、商业分析、运营、职能等校招",
+        lastDate: "往年秋招信息多在 8 月前后集中更新",
+        window: "8 月上旬-9 月",
+        status: "建议关注",
+        link: "https://zhaopin.meituan.com/web/campus",
+        note: "岗位城市和业务线较多，适合按方向提前收藏。"
+      },
+      {
+        id: "watch-jd-campus",
+        company: "京东",
+        role: "技术、供应链、产品、运营、管培等校招",
+        lastDate: "往年秋招通常在暑期后段开始活跃",
+        window: "8 月-9 月",
+        status: "建议关注",
+        link: "https://campus.jd.com/",
+        note: "供应链、物流、零售相关方向可提前关注。"
+      },
+      {
+        id: "watch-huawei-campus",
+        company: "华为",
+        role: "研发、算法、硬件、销售、服务、职能等校招",
+        lastDate: "往年多个批次持续更新，秋招前后岗位较多",
+        window: "7 月-10 月",
+        status: "长期关注",
+        link: "https://career.huawei.com/reccampportal/",
+        note: "适合持续跟踪不同地区、不同批次的入口。"
+      },
+      {
+        id: "watch-xiaomi-campus",
+        company: "小米",
+        role: "软件、硬件、产品、运营、销售等校招",
+        lastDate: "往年秋招期在 8 月前后逐步开放",
+        window: "8 月-9 月",
+        status: "建议关注",
+        link: "https://campus.hr.xiaomi.com/",
+        note: "硬件、IoT、互联网业务方向可以提前准备。"
+      },
+      {
+        id: "watch-netease-campus",
+        company: "网易",
+        role: "游戏、互联网产品、技术、运营、设计等校招",
+        lastDate: "往年暑期到秋招阶段陆续发布",
+        window: "7 月下旬-9 月",
+        status: "建议关注",
+        link: "https://campus.163.com/",
+        note: "游戏和内容方向适合提前整理作品集。"
+      },
+      {
+        id: "watch-baidu-campus",
+        company: "百度",
+        role: "算法、研发、产品、运营、职能等校招",
+        lastDate: "往年秋招岗位常在暑期后段更新",
+        window: "8 月-9 月",
+        status: "建议关注",
+        link: "https://talent.baidu.com/jobs/list",
+        note: "AI、搜索、云相关岗位可重点关注。"
+      },
+      {
+        id: "watch-kuaishou-campus",
+        company: "快手",
+        role: "技术、算法、产品、运营、商业化等校招",
+        lastDate: "往年秋招期通常在 8 月前后开始活跃",
+        window: "8 月-9 月",
+        status: "建议关注",
+        link: "https://zhaopin.kuaishou.cn/",
+        note: "内容社区、直播、电商方向适合提前准备案例。"
+      },
+      {
+        id: "watch-byd-campus",
+        company: "比亚迪",
+        role: "研发、制造、职能、销售、供应链等校招",
+        lastDate: "往年秋招信息多在暑期后段到秋季集中出现",
+        window: "8 月-10 月",
+        status: "建议关注",
+        link: "https://job.byd.com/",
+        note: "新能源、汽车、制造方向同学可以重点跟踪。"
+      },
+      {
+        id: "watch-state-grid-campus",
+        company: "国家电网",
+        role: "电气、通信、计算机、财务、管理等校园招聘",
+        lastDate: "往年招聘批次节奏与公告安排相关",
+        window: "9 月-次年春季",
+        status: "长期关注",
+        link: "https://zhaopin.sgcc.com.cn/",
+        note: "以官方公告和各单位招聘安排为准。"
+      }
     ];
 
     const els = {
@@ -1655,13 +1747,7 @@
       interviewInput: document.querySelector("#interviewInput"),
       summarizeInterview: document.querySelector("#summarizeInterview"),
       interviewSummary: document.querySelector("#interviewSummary"),
-      watchCompany: document.querySelector("#watchCompany"),
-      watchRole: document.querySelector("#watchRole"),
-      watchLastDate: document.querySelector("#watchLastDate"),
-      watchWindow: document.querySelector("#watchWindow"),
-      watchLink: document.querySelector("#watchLink"),
-      watchStatus: document.querySelector("#watchStatus"),
-      saveWatchItem: document.querySelector("#saveWatchItem"),
+      watchFollowCount: document.querySelector("#watchFollowCount"),
       watchList: document.querySelector("#watchList"),
       todoDialog: document.querySelector("#todoDialog"),
       todoDateLabel: document.querySelector("#todoDateLabel"),
@@ -1677,7 +1763,7 @@
       jobs: ["岗位信息", "浏览全部岗位，支持手动输入地点、关键词和学历筛选。"],
       myJobs: ["我的岗位", "管理你自己补充的意向岗位，适合做投递跟进和面试准备。"],
       interview: ["面试情报", "生成面经检索入口，并把粘贴的面经整理成笔试、面试和准备建议。"],
-      watchlist: ["待发布", "按往年发布时间记录待跟踪企业，提醒自己定期检查官方招聘页。"],
+      watchlist: ["待发布", "查看网站整理的往年发布参考，提前关注可能开放的企业官方招聘页。"],
       favorites: ["已收藏岗位", "把感兴趣的机会先收起来，稍后集中比较。"],
       applied: ["已投递岗位", "记录已投递机会，管理后续笔试、面试和跟进。"]
     };
@@ -1755,7 +1841,6 @@
       els.saveTodo.addEventListener("click", saveTodo);
       els.generateInterviewSearch.addEventListener("click", renderInterviewLinks);
       els.summarizeInterview.addEventListener("click", renderInterviewSummary);
-      els.saveWatchItem.addEventListener("click", saveWatchItem);
     }
 
     async function loadExternalJobs() {
@@ -2657,42 +2742,59 @@
       return cities.filter((city) => text.includes(city)).slice(0, 6).join("、");
     }
 
-    function saveWatchItem() {
-      const item = {
-        id: `watch-${Date.now()}`,
-        company: els.watchCompany.value.trim(),
-        role: els.watchRole.value.trim(),
-        lastDate: els.watchLastDate.value.trim(),
-        window: els.watchWindow.value.trim(),
-        link: els.watchLink.value.trim(),
-        status: els.watchStatus.value,
-        updated: todayString()
-      };
-      if (!item.company && !item.role) return;
-      watchlist.unshift(item);
-      localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
-      [els.watchCompany, els.watchRole, els.watchLastDate, els.watchWindow, els.watchLink].forEach((input) => {
-        input.value = "";
-      });
-      els.watchStatus.value = "待跟踪";
-      renderWatchlist();
-    }
-
     function renderWatchlist() {
-      els.watchList.innerHTML = watchlist.length
-        ? watchlist.map((item) => `
+      els.watchFollowCount.textContent = `已关注 ${watchlist.size} 个`;
+      els.watchList.innerHTML = publicWatchlist.length
+        ? publicWatchlist.map((item) => {
+          const followed = watchlist.has(item.id);
+          return `
           <article class="mini-card">
-            <h4>${escapeHtml(item.company || "未填写企业")} ${escapeHtml(item.role || "")}</h4>
+            <div class="panel-head" style="align-items:flex-start; gap:12px;">
+              <div>
+                <h4>${escapeHtml(item.company || "待补充企业")} ${escapeHtml(item.role || "")}</h4>
+                <div class="muted">${escapeHtml(item.note || "请以企业官方招聘页面为准。")}</div>
+              </div>
+              <button class="btn ${followed ? "" : "pink"}" type="button" data-watch-toggle="${escapeAttr(item.id)}">${followed ? "取消关注" : "关注提醒"}</button>
+            </div>
             <div class="tagline">
               <span class="tag">${escapeHtml(item.status || "待跟踪")}</span>
               <span class="tag">往年：${escapeHtml(item.lastDate || "待补充")}</span>
               <span class="tag">关注：${escapeHtml(item.window || "待补充")}</span>
             </div>
-            <div class="muted">更新时间：${escapeHtml(item.updated || "")}</div>
-            ${item.link ? `<div style="margin-top:10px;"><a class="btn" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer">检查官网</a></div>` : ""}
+            <div class="btn-row" style="margin-top:10px;">
+              ${item.link ? `<a class="btn primary" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer">打开官网</a>` : ""}
+              <button class="btn" type="button" data-interview-company="${escapeAttr(item.company)}" data-interview-role="${escapeAttr(item.role)}">查面试情报</button>
+            </div>
           </article>
-        `).join("")
-        : `<div class="empty">还没有待跟踪企业。可以先添加去年 8 月前后发布校招的企业，提醒自己今年定期检查官网。</div>`;
+        `;
+        }).join("")
+        : `<div class="empty">待发布参考清单正在整理中。</div>`;
+      els.watchList.querySelectorAll("[data-watch-toggle]").forEach((button) => {
+        button.addEventListener("click", () => toggleWatchFollow(button.dataset.watchToggle));
+      });
+      els.watchList.querySelectorAll("[data-interview-company]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeView = "interview";
+          document.querySelectorAll(".nav-btn").forEach((navButton) => {
+            navButton.classList.toggle("active", navButton.dataset.nav === "interview");
+          });
+          switchView("interview");
+          els.interviewCompany.value = button.dataset.interviewCompany || "";
+          els.interviewRole.value = button.dataset.interviewRole || "";
+          renderInterviewLinks();
+        });
+      });
+    }
+
+    function toggleWatchFollow(id) {
+      if (!id) return;
+      if (watchlist.has(id)) {
+        watchlist.delete(id);
+      } else {
+        watchlist.add(id);
+      }
+      localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlist]));
+      renderWatchlist();
     }
 
     function renderCalendar() {
