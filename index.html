@@ -548,6 +548,13 @@
       gap: 12px;
     }
 
+    .profile-workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(340px, 0.9fr);
+      gap: 16px;
+      align-items: start;
+    }
+
     .profile-grid .full {
       grid-column: 1 / -1;
     }
@@ -620,6 +627,19 @@
       align-items: center;
     }
 
+    .resume-upload-inline {
+      display: grid;
+      grid-template-columns: auto minmax(150px, 1fr);
+      gap: 8px;
+      align-items: center;
+      min-width: min(360px, 42vw);
+      margin-right: auto;
+    }
+
+    .resume-upload-inline input {
+      height: 40px;
+    }
+
     .analysis-grid {
       display: grid;
       grid-template-columns: 110px repeat(3, minmax(0, 1fr));
@@ -653,6 +673,30 @@
       color: #4f483e;
       font-size: 13px;
       line-height: 1.6;
+    }
+
+    .profile-workspace .analysis-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .interview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .search-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
     }
 
     .summary-item {
@@ -916,11 +960,12 @@
       }
 
       .nav-group {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
       }
 
       .dashboard-grid,
       .stats-grid,
+      .profile-workspace,
       .analysis-grid {
         grid-template-columns: 1fr 1fr;
       }
@@ -948,6 +993,9 @@
       .dashboard-grid,
       .stats-grid,
       .analysis-grid,
+      .profile-workspace,
+      .interview-grid,
+      .summary-grid,
       .file-row {
         grid-template-columns: 1fr;
       }
@@ -985,6 +1033,7 @@
         <button class="nav-btn active" data-nav="home" type="button">首页</button>
         <button class="nav-btn" data-nav="profile" type="button">个人信息</button>
         <button class="nav-btn" data-nav="jobs" type="button">岗位信息</button>
+        <button class="nav-btn" data-nav="interview" type="button">面试情报</button>
         <button class="nav-btn" data-nav="favorites" type="button">已收藏岗位</button>
         <button class="nav-btn" data-nav="applied" type="button">已投递岗位</button>
       </nav>
@@ -1051,9 +1100,14 @@
       </section>
 
       <section class="view" id="profileView">
+        <div class="profile-workspace">
         <section class="panel">
           <div class="panel-head">
             <h3>个人信息卡片</h3>
+            <div class="resume-upload-inline">
+              <input id="resumeFile" type="file" accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="上传简历">
+              <span class="muted" id="resumeStatus">上传简历后自动填充</span>
+            </div>
             <div class="btn-row">
               <button class="btn" id="clearProfile" type="button">清空</button>
               <button class="btn pink" id="recommendFromProfile" type="button">为我推荐</button>
@@ -1111,17 +1165,6 @@
               <textarea id="profileSkills" placeholder="例如：Python、SQL、Excel、CET-6、教师资格证、证券从业资格"></textarea>
             </div>
             <div class="field full">
-              <label for="resumeFile">上传简历（.docx / .pdf，可尝试自动识别填充）</label>
-              <div class="file-row">
-                <input id="resumeFile" type="file" accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
-                <span class="muted" id="resumeStatus">未上传</span>
-              </div>
-            </div>
-            <div class="field full">
-              <label for="resumeText">简历文本识别结果 / 手动粘贴区</label>
-              <textarea id="resumeText" placeholder="如果文件识别失败，可以把简历文字粘贴在这里，再点击保存信息。"></textarea>
-            </div>
-            <div class="field full">
               <label for="profileCampus">校园经历</label>
               <textarea id="profileCampus"></textarea>
             </div>
@@ -1145,6 +1188,7 @@
           </div>
           <div id="profileAnalysis" class="analysis-grid"></div>
         </section>
+        </div>
       </section>
 
       <section class="view" id="jobsView">
@@ -1225,6 +1269,37 @@
         </section>
       </section>
 
+      <section class="view" id="interviewView">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>面试情报检索助手</h3>
+            <button class="btn primary" id="generateInterviewSearch" type="button">生成检索入口</button>
+          </div>
+          <div class="interview-grid">
+            <div class="field">
+              <label for="interviewCompany">企业名称</label>
+              <input id="interviewCompany" type="text" placeholder="例如：美团、华为、比亚迪">
+            </div>
+            <div class="field">
+              <label for="interviewRole">岗位名称</label>
+              <input id="interviewRole" type="text" placeholder="例如：产品经理、数据分析、Java开发">
+            </div>
+          </div>
+          <div class="search-links" id="interviewLinks"></div>
+        </section>
+        <section class="panel" style="margin-top: 16px;">
+          <div class="panel-head">
+            <h3>粘贴面经后自动总结</h3>
+            <button class="btn pink" id="summarizeInterview" type="button">生成总结</button>
+          </div>
+          <div class="field">
+            <label for="interviewInput">面经 / 笔试题 / 评论反馈</label>
+            <textarea id="interviewInput" placeholder="把你在小红书、牛客、看准、公众号等看到的面试经验粘贴到这里，系统会按笔试题、面试题、流程、体验、风险、建议进行整理。"></textarea>
+          </div>
+          <div class="summary-grid" id="interviewSummary"></div>
+        </section>
+      </section>
+
       <section class="view" id="favoritesView">
         <section class="panel">
           <div class="panel-head">
@@ -1287,6 +1362,7 @@
         <div class="btn-row">
           <button class="btn" id="modalFavorite" type="button">收藏岗位</button>
           <button class="btn pink" id="modalApplied" type="button">标记已投递</button>
+          <button class="btn" id="modalInterview" type="button">查看面试情报</button>
           <a class="btn green" id="modalApply" href="#" target="_blank" rel="noopener noreferrer">官方投递</a>
         </div>
       </footer>
@@ -1409,7 +1485,6 @@
       profileSkills: document.querySelector("#profileSkills"),
       resumeFile: document.querySelector("#resumeFile"),
       resumeStatus: document.querySelector("#resumeStatus"),
-      resumeText: document.querySelector("#resumeText"),
       profileCampus: document.querySelector("#profileCampus"),
       profileExperience: document.querySelector("#profileExperience"),
       profilePortfolio: document.querySelector("#profilePortfolio"),
@@ -1431,7 +1506,15 @@
       modalSource: document.querySelector("#modalSource"),
       modalFavorite: document.querySelector("#modalFavorite"),
       modalApplied: document.querySelector("#modalApplied"),
+      modalInterview: document.querySelector("#modalInterview"),
       modalApply: document.querySelector("#modalApply"),
+      interviewCompany: document.querySelector("#interviewCompany"),
+      interviewRole: document.querySelector("#interviewRole"),
+      generateInterviewSearch: document.querySelector("#generateInterviewSearch"),
+      interviewLinks: document.querySelector("#interviewLinks"),
+      interviewInput: document.querySelector("#interviewInput"),
+      summarizeInterview: document.querySelector("#summarizeInterview"),
+      interviewSummary: document.querySelector("#interviewSummary"),
       todoDialog: document.querySelector("#todoDialog"),
       todoDateLabel: document.querySelector("#todoDateLabel"),
       todoText: document.querySelector("#todoText"),
@@ -1444,6 +1527,7 @@
       home: ["首页", "今日新增、收藏、投递、待办，一眼看清你的求职进度。"],
       profile: ["个人信息", "填写你的求职档案，系统会按意向岗位顺序推荐岗位。"],
       jobs: ["岗位信息", "浏览全部岗位，支持手动输入地点、关键词和学历筛选。"],
+      interview: ["面试情报", "生成面经检索入口，并把粘贴的面经整理成笔试、面试和准备建议。"],
       favorites: ["已收藏岗位", "把感兴趣的机会先收起来，稍后集中比较。"],
       applied: ["已投递岗位", "记录已投递机会，管理后续笔试、面试和跟进。"]
     };
@@ -1492,7 +1576,6 @@
       });
       els.intentInput.addEventListener("blur", () => addIntent(els.intentInput.value));
       els.resumeFile.addEventListener("change", handleResumeUpload);
-      els.resumeText.addEventListener("blur", () => applyResumeText(els.resumeText.value, false));
       els.saveProfile.addEventListener("click", saveProfileFromForm);
       els.recommendFromProfile.addEventListener("click", () => {
         saveProfileFromForm("jobs");
@@ -1512,6 +1595,8 @@
       els.closeTodo.addEventListener("click", closeTodo);
       els.cancelTodo.addEventListener("click", closeTodo);
       els.saveTodo.addEventListener("click", saveTodo);
+      els.generateInterviewSearch.addEventListener("click", renderInterviewLinks);
+      els.summarizeInterview.addEventListener("click", renderInterviewSummary);
     }
 
     async function loadExternalJobs() {
@@ -1806,6 +1891,11 @@
       els.modalApplied.className = isApplied(job) ? "btn pink" : "btn pink";
       els.modalFavorite.onclick = () => toggleFavorite(job);
       els.modalApplied.onclick = () => toggleApplied(job);
+      els.modalInterview.onclick = () => {
+        closeJob();
+        fillInterviewSearch(job.company, job.role);
+        switchView("interview");
+      };
       els.jobDialog.showModal();
     }
 
@@ -1893,8 +1983,7 @@
       els.profileSchool.value = profile.school || "";
       els.profileMajor.value = profile.major || "";
       els.profileSkills.value = profile.skills || "";
-      els.resumeText.value = profile.resumeText || "";
-      els.resumeStatus.textContent = profile.resumeFileName ? `已上传：${profile.resumeFileName}` : "未上传";
+      els.resumeStatus.textContent = profile.resumeFileName ? `已识别：${profile.resumeFileName}` : "上传简历后自动填充";
       els.profileCampus.value = profile.campus || "";
       els.profileExperience.value = profile.experience || "";
       els.profilePortfolio.value = profile.portfolio || "";
@@ -1911,7 +2000,7 @@
         major: els.profileMajor.value.trim(),
         intents: profile.intents || [],
         skills: els.profileSkills.value.trim(),
-        resumeText: els.resumeText.value.trim(),
+        resumeText: profile.resumeText || "",
         resumeFileName: profile.resumeFileName || "",
         campus: els.profileCampus.value.trim(),
         experience: els.profileExperience.value.trim(),
@@ -1967,13 +2056,13 @@
       els.resumeStatus.textContent = "正在识别...";
       try {
         const text = await extractResumeText(file);
-        els.resumeText.value = text;
+        profile.resumeText = text;
         applyResumeText(text, true);
         els.resumeStatus.textContent = `已识别：${file.name}`;
       } catch (error) {
-        els.resumeStatus.textContent = `已上传：${file.name}，自动识别失败，可粘贴文本`;
+        els.resumeStatus.textContent = `识别失败：${file.name}，可换 .docx 或清晰 PDF`;
       }
-      localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...profile, resumeFileName: file.name }));
+      saveProfileFromForm("profile");
     }
 
     async function extractResumeText(file) {
@@ -2218,6 +2307,92 @@
         job.responsibilities.join(" "),
         job.requirements.join(" ")
       ].join(" "));
+    }
+
+    function fillInterviewSearch(company, role) {
+      els.interviewCompany.value = company || "";
+      els.interviewRole.value = role || "";
+      renderInterviewLinks();
+    }
+
+    function renderInterviewLinks() {
+      const company = els.interviewCompany.value.trim();
+      const role = els.interviewRole.value.trim();
+      const keyword = [company, role, "面经"].filter(Boolean).join(" ");
+      if (!keyword) {
+        els.interviewLinks.innerHTML = `<span class="muted">先填写企业名称或岗位名称。</span>`;
+        return;
+      }
+      const encoded = encodeURIComponent(keyword);
+      const links = [
+        ["小红书", `https://www.xiaohongshu.com/search_result?keyword=${encoded}`],
+        ["牛客", `https://www.nowcoder.com/search?query=${encoded}`],
+        ["看准", `https://www.kanzhun.com/search?query=${encoded}`],
+        ["百度", `https://www.baidu.com/s?wd=${encoded}`],
+        ["微信文章", `https://weixin.sogou.com/weixin?type=2&query=${encoded}`]
+      ];
+      els.interviewLinks.innerHTML = links.map(([label, url]) => `
+        <a class="btn" href="${url}" target="_blank" rel="noopener noreferrer">${label}检索</a>
+      `).join("");
+    }
+
+    function renderInterviewSummary() {
+      const text = els.interviewInput.value.trim();
+      if (!text) {
+        els.interviewSummary.innerHTML = `<div class="empty">粘贴面经、笔试题或评论反馈后，再生成总结。</div>`;
+        return;
+      }
+      const summary = summarizeInterviewText(text);
+      els.interviewSummary.innerHTML = [
+        summaryCard("笔试 / 测评", summary.written),
+        summaryCard("高频面试题", summary.questions),
+        summaryCard("面试流程", summary.process),
+        summaryCard("体验反馈", summary.feedback),
+        summaryCard("风险提醒", summary.risks),
+        summaryCard("准备建议", summary.suggestions)
+      ].join("");
+    }
+
+    function summarizeInterviewText(text) {
+      const sentences = splitSentences(text);
+      const pick = (patterns, fallback) => {
+        const matched = sentences.filter((sentence) => patterns.some((pattern) => pattern.test(sentence))).slice(0, 5);
+        return matched.length ? matched : fallback;
+      };
+      return {
+        written: pick([/笔试|测评|行测|性格|题|算法|SQL|英语|逻辑|编程/], ["没有明显笔试信息，建议继续搜索“笔试”“测评”“题型”。"]),
+        questions: pick([/问|问题|面试官|自我介绍|项目|实习|优缺点|为什么|职业规划|反问/], ["没有明显面试题，可先准备自我介绍、项目深挖、岗位理解和反问。"]),
+        process: pick([/一面|二面|三面|HR|群面|业务面|主管面|终面|流程|轮|通知|多久/], ["没有明显流程信息，建议记录轮次、间隔时间和面试形式。"]),
+        feedback: pick([/体验|感觉|氛围|态度|友好|压力|难|简单|轻松|加班|薪资|地点/], ["没有明显体验反馈，建议关注面试氛围、难度、反馈速度。"]),
+        risks: pick([/压力|挂|拒|坑|加班|压薪|不回复|鸽|卡学历|学历|实习时长|转正/], ["暂未发现明显风险词，仍建议核对岗位要求、地点、薪资和截止时间。"]),
+        suggestions: makeInterviewSuggestions(text)
+      };
+    }
+
+    function makeInterviewSuggestions(text) {
+      const suggestions = ["准备 1 分钟和 3 分钟两个版本的自我介绍。"];
+      if (/项目|实习|经历/.test(text)) suggestions.push("把简历中的项目按背景、任务、行动、结果整理成 2-3 个案例。");
+      if (/数据|SQL|分析|算法|编程|技术/.test(text)) suggestions.push("复习岗位相关工具和技术题，准备可复盘的解题过程。");
+      if (/产品|运营|市场|销售/.test(text)) suggestions.push("准备岗位理解、用户/业务分析、过往案例和指标意识。");
+      if (/群面|无领导/.test(text)) suggestions.push("群面前练习破冰、框架梳理、时间提醒和总结陈述。");
+      suggestions.push("面试结束后记录问题、回答不足和下一次可优化的话术。");
+      return suggestions.slice(0, 5);
+    }
+
+    function splitSentences(text) {
+      return String(text || "")
+        .split(/\r?\n|。|；|;|！|!|？|\?/)
+        .map((item) => item.trim())
+        .filter((item) => item.length >= 4);
+    }
+
+    function summaryCard(title, items) {
+      return `
+        <div class="analysis-box">
+          <h4>${escapeHtml(title)}</h4>
+          <ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+      `;
     }
 
     function renderCalendar() {
