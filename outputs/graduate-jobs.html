@@ -620,6 +620,51 @@
       line-height: 1.7;
     }
 
+    .image-dropzone {
+      min-height: 118px;
+      border: 1px dashed rgba(16, 16, 16, 0.28);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      align-content: center;
+      background: #fffdf8;
+      cursor: pointer;
+    }
+
+    .image-dropzone:focus,
+    .image-dropzone.dragging {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(29, 128, 108, 0.12);
+      outline: none;
+    }
+
+    .image-dropzone strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .image-dropzone span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .image-preview-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .image-preview {
+      width: 72px;
+      height: 72px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      object-fit: cover;
+      background: #fff;
+    }
+
     .file-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -1291,8 +1336,19 @@
         </section>
         <section class="panel" style="margin-top: 16px;">
           <div class="panel-head">
-            <h3>粘贴面经后自动总结</h3>
-            <button class="btn pink" id="summarizeInterview" type="button">生成总结</button>
+            <h3>粘贴 / 截图后自动总结</h3>
+            <div class="btn-row">
+              <button class="btn" id="recognizeInterviewImages" type="button">识别截图</button>
+              <button class="btn pink" id="summarizeInterview" type="button">生成总结</button>
+            </div>
+          </div>
+          <div class="image-dropzone" id="interviewImageDrop" tabindex="0">
+            <div>
+              <strong>粘贴、拖拽或上传面经/评论区截图</strong>
+              <span>复制小红书截图后在这里按 Ctrl + V；也可以拖拽图片，或点击选择图片。</span>
+            </div>
+            <input id="interviewImageInput" type="file" accept="image/*" multiple hidden>
+            <div class="image-preview-list" id="interviewImagePreview"></div>
           </div>
           <div class="field">
             <label for="interviewInput">面经 / 笔试题 / 评论反馈</label>
@@ -1429,18 +1485,25 @@
         </div>
       </header>
       <div class="modal-body">
-        <div class="field">
-          <label for="addJobText">粘贴岗位正文</label>
-          <textarea id="addJobText" placeholder="把公众号、官网、小红书、群聊里看到的岗位信息粘贴到这里。"></textarea>
+          <div class="field">
+            <label for="addJobText">粘贴岗位正文</label>
+            <textarea id="addJobText" placeholder="把公众号、官网、小红书、群聊里看到的岗位信息粘贴到这里。"></textarea>
+          </div>
+        <div class="field" style="margin-top: 12px;">
+          <label>岗位截图 / 评论截图</label>
+          <div class="image-dropzone" id="addJobImageDrop" tabindex="0">
+            <div>
+              <strong>粘贴、拖拽或上传截图</strong>
+              <span>复制小红书/公众号/群聊截图后在这里按 Ctrl + V；也可以拖拽图片，或点击选择图片。</span>
+            </div>
+            <input id="addJobImage" type="file" accept="image/*" multiple hidden>
+            <div class="image-preview-list" id="addJobImagePreview"></div>
+          </div>
         </div>
         <div class="interview-grid" style="margin-top: 12px;">
           <div class="field">
             <label for="addJobLink">投递 / 原文链接</label>
             <input id="addJobLink" type="url" placeholder="https://">
-          </div>
-          <div class="field">
-            <label for="addJobImage">图片备注</label>
-            <input id="addJobImage" type="file" accept="image/*">
           </div>
         </div>
         <div class="interview-grid" style="margin-top: 12px;">
@@ -1469,11 +1532,12 @@
             <input id="addDeadline" type="text" placeholder="例如：2026-08-31">
           </div>
         </div>
-        <div class="profile-help" style="margin-top: 12px;" id="addJobStatus">图片第一版仅作为备注保存；岗位字段可自动识别，也可以手动修改。</div>
+        <div class="profile-help" style="margin-top: 12px;" id="addJobStatus">可粘贴文字、链接或截图；截图识别后会自动补充到岗位正文，再尝试填充字段。</div>
       </div>
       <footer class="modal-foot">
         <button class="btn" id="cancelAddJob" type="button">取消</button>
         <div class="btn-row">
+          <button class="btn" id="recognizeAddJobImages" type="button">识别截图</button>
           <button class="btn pink" id="parseAddJob" type="button">识别信息</button>
           <button class="btn primary" id="saveAddJob" type="button">保存岗位</button>
         </div>
@@ -1501,6 +1565,9 @@
     let userJobs = loadArray(USER_JOBS_KEY).map(normalizeJob);
     let watchlist = new Set([...loadSet(WATCHLIST_KEY)].filter((id) => typeof id === "string"));
     let selectedTodoDate = todayString();
+    let addJobImageFiles = [];
+    let interviewImageFiles = [];
+    let tesseractLoader = null;
 
     const fallbackJobs = [
       {
@@ -1728,10 +1795,13 @@
       closeAddJob: document.querySelector("#closeAddJob"),
       cancelAddJob: document.querySelector("#cancelAddJob"),
       parseAddJob: document.querySelector("#parseAddJob"),
+      recognizeAddJobImages: document.querySelector("#recognizeAddJobImages"),
       saveAddJob: document.querySelector("#saveAddJob"),
       addJobText: document.querySelector("#addJobText"),
       addJobLink: document.querySelector("#addJobLink"),
+      addJobImageDrop: document.querySelector("#addJobImageDrop"),
       addJobImage: document.querySelector("#addJobImage"),
+      addJobImagePreview: document.querySelector("#addJobImagePreview"),
       addCompany: document.querySelector("#addCompany"),
       addRole: document.querySelector("#addRole"),
       addCity: document.querySelector("#addCity"),
@@ -1745,6 +1815,10 @@
       generateInterviewSearch: document.querySelector("#generateInterviewSearch"),
       interviewLinks: document.querySelector("#interviewLinks"),
       interviewInput: document.querySelector("#interviewInput"),
+      interviewImageDrop: document.querySelector("#interviewImageDrop"),
+      interviewImageInput: document.querySelector("#interviewImageInput"),
+      interviewImagePreview: document.querySelector("#interviewImagePreview"),
+      recognizeInterviewImages: document.querySelector("#recognizeInterviewImages"),
       summarizeInterview: document.querySelector("#summarizeInterview"),
       interviewSummary: document.querySelector("#interviewSummary"),
       watchFollowCount: document.querySelector("#watchFollowCount"),
@@ -1830,9 +1904,19 @@
       els.closeAddJob.addEventListener("click", closeAddJobDialog);
       els.cancelAddJob.addEventListener("click", closeAddJobDialog);
       els.parseAddJob.addEventListener("click", parseAddJobText);
+      els.recognizeAddJobImages.addEventListener("click", recognizeAddJobImages);
       els.saveAddJob.addEventListener("click", saveUserJob);
       els.addJobDialog.addEventListener("click", (event) => {
         if (event.target === els.addJobDialog) closeAddJobDialog();
+      });
+      bindImageDropzone({
+        zone: els.addJobImageDrop,
+        input: els.addJobImage,
+        preview: els.addJobImagePreview,
+        setFiles: (files) => {
+          addJobImageFiles = files;
+          els.addJobStatus.textContent = files.length ? `已添加 ${files.length} 张截图，可点击“识别截图”。` : "可粘贴文字、链接或截图；截图识别后会自动补充到岗位正文，再尝试填充字段。";
+        }
       });
 
       els.addTodayTodo.addEventListener("click", () => openTodoDialog(selectedTodoDate));
@@ -1840,7 +1924,19 @@
       els.cancelTodo.addEventListener("click", closeTodo);
       els.saveTodo.addEventListener("click", saveTodo);
       els.generateInterviewSearch.addEventListener("click", renderInterviewLinks);
+      els.recognizeInterviewImages.addEventListener("click", recognizeInterviewImages);
       els.summarizeInterview.addEventListener("click", renderInterviewSummary);
+      bindImageDropzone({
+        zone: els.interviewImageDrop,
+        input: els.interviewImageInput,
+        preview: els.interviewImagePreview,
+        setFiles: (files) => {
+          interviewImageFiles = files;
+          if (files.length && !els.interviewInput.value.trim()) {
+            els.interviewInput.placeholder = `已添加 ${files.length} 张截图，点击“识别截图”后会把文字放到这里。`;
+          }
+        }
+      });
     }
 
     async function loadExternalJobs() {
@@ -2593,6 +2689,123 @@
       `).join("");
     }
 
+    function bindImageDropzone({ zone, input, preview, setFiles }) {
+      const update = (files) => {
+        const images = files.filter((file) => file && file.type.startsWith("image/"));
+        setFiles(images);
+        renderImagePreview(preview, images);
+      };
+      zone.addEventListener("click", () => input.click());
+      zone.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          input.click();
+        }
+      });
+      input.addEventListener("change", () => update([...input.files]));
+      zone.addEventListener("paste", (event) => {
+        const files = [...(event.clipboardData?.files || [])];
+        if (files.some((file) => file.type.startsWith("image/"))) {
+          event.preventDefault();
+          update(files);
+        }
+      });
+      ["dragenter", "dragover"].forEach((name) => {
+        zone.addEventListener(name, (event) => {
+          event.preventDefault();
+          zone.classList.add("dragging");
+        });
+      });
+      ["dragleave", "drop"].forEach((name) => {
+        zone.addEventListener(name, () => zone.classList.remove("dragging"));
+      });
+      zone.addEventListener("drop", (event) => {
+        event.preventDefault();
+        update([...(event.dataTransfer?.files || [])]);
+      });
+    }
+
+    function renderImagePreview(container, files) {
+      container.innerHTML = files.map((file) => `
+        <img class="image-preview" src="${escapeAttr(URL.createObjectURL(file))}" alt="${escapeAttr(file.name || "截图")}">
+      `).join("");
+    }
+
+    async function recognizeAddJobImages() {
+      if (!addJobImageFiles.length) {
+        els.addJobStatus.textContent = "请先粘贴、拖拽或上传岗位截图。";
+        els.addJobImageDrop.focus();
+        return;
+      }
+      els.addJobStatus.textContent = "正在识别截图文字，首次使用可能需要等待十几秒。";
+      const text = await recognizeImages(addJobImageFiles, (message) => {
+        els.addJobStatus.textContent = message;
+      });
+      if (!text.trim()) {
+        els.addJobStatus.textContent = "没有识别到清晰文字，可以换一张更清晰的截图，或手动粘贴文字。";
+        return;
+      }
+      appendTextareaText(els.addJobText, text);
+      parseAddJobText();
+      els.addJobStatus.textContent = "截图文字已识别并写入岗位正文，字段也已尝试自动填充。";
+    }
+
+    async function recognizeInterviewImages() {
+      if (!interviewImageFiles.length) {
+        els.interviewImageDrop.focus();
+        els.interviewSummary.innerHTML = `<div class="empty">请先粘贴、拖拽或上传面经/评论区截图。</div>`;
+        return;
+      }
+      els.interviewSummary.innerHTML = `<div class="empty">正在识别截图文字，首次使用可能需要等待十几秒。</div>`;
+      const text = await recognizeImages(interviewImageFiles, (message) => {
+        els.interviewSummary.innerHTML = `<div class="empty">${escapeHtml(message)}</div>`;
+      });
+      if (!text.trim()) {
+        els.interviewSummary.innerHTML = `<div class="empty">没有识别到清晰文字，可以换一张更清晰的截图，或手动粘贴文字。</div>`;
+        return;
+      }
+      appendTextareaText(els.interviewInput, text);
+      renderInterviewSummary();
+    }
+
+    async function recognizeImages(files, onProgress) {
+      try {
+        await loadTesseract();
+        const chunks = [];
+        for (const [index, file] of files.entries()) {
+          onProgress?.(`正在识别第 ${index + 1} / ${files.length} 张截图...`);
+          const result = await Tesseract.recognize(file, "chi_sim+eng");
+          chunks.push(result.data?.text || "");
+        }
+        return chunks.join("\n").trim();
+      } catch (error) {
+        onProgress?.("截图识别失败。可能是网络没有加载 OCR 组件，或图片文字过于模糊；可以先手动粘贴文字。");
+        return "";
+      }
+    }
+
+    function loadTesseract() {
+      if (window.Tesseract) return Promise.resolve();
+      if (tesseractLoader) return tesseractLoader;
+      tesseractLoader = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error("Could not load OCR library"));
+        document.head.appendChild(script);
+      });
+      return tesseractLoader;
+    }
+
+    function appendTextareaText(textarea, text) {
+      const next = text.trim();
+      if (!next) return;
+      textarea.value = textarea.value.trim()
+        ? `${textarea.value.trim()}\n\n${next}`
+        : next;
+    }
+
     function renderInterviewSummary() {
       const text = els.interviewInput.value.trim();
       if (!text) {
@@ -2665,8 +2878,10 @@
       [els.addJobText, els.addJobLink, els.addCompany, els.addRole, els.addCity, els.addDegree, els.addType, els.addDeadline].forEach((input) => {
         input.value = "";
       });
+      addJobImageFiles = [];
       els.addJobImage.value = "";
-      els.addJobStatus.textContent = "图片第一版仅作为备注保存；岗位字段可自动识别，也可以手动修改。";
+      els.addJobImagePreview.innerHTML = "";
+      els.addJobStatus.textContent = "可粘贴文字、链接或截图；截图识别后会自动补充到岗位正文，再尝试填充字段。";
     }
 
     function parseAddJobText() {
@@ -2708,7 +2923,7 @@
         link: els.addJobLink.value.trim() || "#",
         responsibilities: rawText ? toList(rawText).slice(0, 8) : ["用户自行补充，待进一步整理。"],
         requirements: rawText ? toList(rawText).slice(0, 8) : ["用户自行补充，待进一步整理。"],
-        imageNote: els.addJobImage.files[0]?.name || ""
+        imageNote: addJobImageFiles.map((file) => file.name).filter(Boolean).join("、")
       });
       userJobs.unshift(job);
       localStorage.setItem(USER_JOBS_KEY, JSON.stringify(userJobs));
