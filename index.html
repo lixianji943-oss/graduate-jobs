@@ -960,7 +960,7 @@
       }
 
       .nav-group {
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        grid-template-columns: repeat(8, minmax(0, 1fr));
       }
 
       .dashboard-grid,
@@ -1033,7 +1033,9 @@
         <button class="nav-btn active" data-nav="home" type="button">首页</button>
         <button class="nav-btn" data-nav="profile" type="button">个人信息</button>
         <button class="nav-btn" data-nav="jobs" type="button">岗位信息</button>
+        <button class="nav-btn" data-nav="myJobs" type="button">我的岗位</button>
         <button class="nav-btn" data-nav="interview" type="button">面试情报</button>
+        <button class="nav-btn" data-nav="watchlist" type="button">待发布</button>
         <button class="nav-btn" data-nav="favorites" type="button">已收藏岗位</button>
         <button class="nav-btn" data-nav="applied" type="button">已投递岗位</button>
       </nav>
@@ -1300,6 +1302,59 @@
         </section>
       </section>
 
+      <section class="view" id="myJobsView">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>我的岗位</h3>
+            <button class="btn primary" id="openAddJob" type="button">新增岗位</button>
+          </div>
+          <div class="profile-help">这里保存你自己从其他平台看到、想投递或想跟进的岗位，不会混入公共岗位信息库。</div>
+          <div class="card-list" id="myJobList" style="margin-top: 14px;"></div>
+        </section>
+      </section>
+
+      <section class="view" id="watchlistView">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>待发布岗位 / 往年发布参考</h3>
+            <button class="btn primary" id="saveWatchItem" type="button">保存跟踪</button>
+          </div>
+          <div class="interview-grid">
+            <div class="field">
+              <label for="watchCompany">企业名称</label>
+              <input id="watchCompany" type="text" placeholder="例如：腾讯、字节跳动、国家电网">
+            </div>
+            <div class="field">
+              <label for="watchRole">岗位方向</label>
+              <input id="watchRole" type="text" placeholder="例如：产品经理、管培生、暑期实习">
+            </div>
+            <div class="field">
+              <label for="watchLastDate">往年发布时间</label>
+              <input id="watchLastDate" type="text" placeholder="例如：2025-08-12 或 8月中旬">
+            </div>
+            <div class="field">
+              <label for="watchWindow">预计关注窗口</label>
+              <input id="watchWindow" type="text" placeholder="例如：7月底-8月中旬">
+            </div>
+            <div class="field">
+              <label for="watchLink">官网 / 往年链接</label>
+              <input id="watchLink" type="url" placeholder="https://">
+            </div>
+            <div class="field">
+              <label for="watchStatus">跟踪状态</label>
+              <select id="watchStatus">
+                <option value="待跟踪">待跟踪</option>
+                <option value="已检查">已检查</option>
+                <option value="今年已发布">今年已发布</option>
+                <option value="暂未找到">暂未找到</option>
+              </select>
+            </div>
+          </div>
+          <div class="profile-help" style="margin-top: 14px;">这里记录的是往年官方发布节奏和今年需要检查的企业，不代表岗位一定发布。</div>
+          <div class="card-list" id="watchList" style="margin-top: 14px;"></div>
+        </section>
+      </section>
+
       <section class="view" id="favoritesView">
         <section class="panel">
           <div class="panel-head">
@@ -1393,6 +1448,70 @@
     </article>
   </dialog>
 
+  <dialog id="addJobDialog">
+    <article class="modal">
+      <header class="modal-head">
+        <div class="modal-title-row">
+          <div>
+            <div class="company">我的补充岗位</div>
+            <h2>新增岗位</h2>
+          </div>
+          <button class="close" id="closeAddJob" type="button" aria-label="关闭">×</button>
+        </div>
+      </header>
+      <div class="modal-body">
+        <div class="field">
+          <label for="addJobText">粘贴岗位正文</label>
+          <textarea id="addJobText" placeholder="把公众号、官网、小红书、群聊里看到的岗位信息粘贴到这里。"></textarea>
+        </div>
+        <div class="interview-grid" style="margin-top: 12px;">
+          <div class="field">
+            <label for="addJobLink">投递 / 原文链接</label>
+            <input id="addJobLink" type="url" placeholder="https://">
+          </div>
+          <div class="field">
+            <label for="addJobImage">图片备注</label>
+            <input id="addJobImage" type="file" accept="image/*">
+          </div>
+        </div>
+        <div class="interview-grid" style="margin-top: 12px;">
+          <div class="field">
+            <label for="addCompany">企业名称</label>
+            <input id="addCompany" type="text">
+          </div>
+          <div class="field">
+            <label for="addRole">岗位名称</label>
+            <input id="addRole" type="text">
+          </div>
+          <div class="field">
+            <label for="addCity">工作地点</label>
+            <input id="addCity" type="text">
+          </div>
+          <div class="field">
+            <label for="addDegree">学历要求</label>
+            <input id="addDegree" type="text">
+          </div>
+          <div class="field">
+            <label for="addType">岗位类型</label>
+            <input id="addType" type="text" placeholder="实习 / 正职 / 提前批">
+          </div>
+          <div class="field">
+            <label for="addDeadline">截止时间</label>
+            <input id="addDeadline" type="text" placeholder="例如：2026-08-31">
+          </div>
+        </div>
+        <div class="profile-help" style="margin-top: 12px;" id="addJobStatus">图片第一版仅作为备注保存；岗位字段可自动识别，也可以手动修改。</div>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn" id="cancelAddJob" type="button">取消</button>
+        <div class="btn-row">
+          <button class="btn pink" id="parseAddJob" type="button">识别信息</button>
+          <button class="btn primary" id="saveAddJob" type="button">保存岗位</button>
+        </div>
+      </footer>
+    </article>
+  </dialog>
+
   <script>
     const DATA_ENDPOINT = "jobs-data.json";
     const MAX_RENDERED_JOBS = 200;
@@ -1400,6 +1519,8 @@
     const APPLIED_KEY = "graduateJobApplied";
     const PROFILE_KEY = "graduateJobProfile";
     const TODOS_KEY = "graduateJobTodos";
+    const USER_JOBS_KEY = "graduateJobUserJobs";
+    const WATCHLIST_KEY = "graduateJobWatchlist";
 
     let jobs = [];
     let activeView = "home";
@@ -1408,6 +1529,8 @@
     let appliedIds = loadSet(APPLIED_KEY);
     let profile = loadObject(PROFILE_KEY);
     let todos = loadObject(TODOS_KEY);
+    let userJobs = loadArray(USER_JOBS_KEY).map(normalizeJob);
+    let watchlist = loadArray(WATCHLIST_KEY);
     let selectedTodoDate = todayString();
 
     const fallbackJobs = [
@@ -1508,6 +1631,23 @@
       modalApplied: document.querySelector("#modalApplied"),
       modalInterview: document.querySelector("#modalInterview"),
       modalApply: document.querySelector("#modalApply"),
+      openAddJob: document.querySelector("#openAddJob"),
+      addJobDialog: document.querySelector("#addJobDialog"),
+      closeAddJob: document.querySelector("#closeAddJob"),
+      cancelAddJob: document.querySelector("#cancelAddJob"),
+      parseAddJob: document.querySelector("#parseAddJob"),
+      saveAddJob: document.querySelector("#saveAddJob"),
+      addJobText: document.querySelector("#addJobText"),
+      addJobLink: document.querySelector("#addJobLink"),
+      addJobImage: document.querySelector("#addJobImage"),
+      addCompany: document.querySelector("#addCompany"),
+      addRole: document.querySelector("#addRole"),
+      addCity: document.querySelector("#addCity"),
+      addDegree: document.querySelector("#addDegree"),
+      addType: document.querySelector("#addType"),
+      addDeadline: document.querySelector("#addDeadline"),
+      addJobStatus: document.querySelector("#addJobStatus"),
+      myJobList: document.querySelector("#myJobList"),
       interviewCompany: document.querySelector("#interviewCompany"),
       interviewRole: document.querySelector("#interviewRole"),
       generateInterviewSearch: document.querySelector("#generateInterviewSearch"),
@@ -1515,6 +1655,14 @@
       interviewInput: document.querySelector("#interviewInput"),
       summarizeInterview: document.querySelector("#summarizeInterview"),
       interviewSummary: document.querySelector("#interviewSummary"),
+      watchCompany: document.querySelector("#watchCompany"),
+      watchRole: document.querySelector("#watchRole"),
+      watchLastDate: document.querySelector("#watchLastDate"),
+      watchWindow: document.querySelector("#watchWindow"),
+      watchLink: document.querySelector("#watchLink"),
+      watchStatus: document.querySelector("#watchStatus"),
+      saveWatchItem: document.querySelector("#saveWatchItem"),
+      watchList: document.querySelector("#watchList"),
       todoDialog: document.querySelector("#todoDialog"),
       todoDateLabel: document.querySelector("#todoDateLabel"),
       todoText: document.querySelector("#todoText"),
@@ -1527,7 +1675,9 @@
       home: ["首页", "今日新增、收藏、投递、待办，一眼看清你的求职进度。"],
       profile: ["个人信息", "填写你的求职档案，系统会按意向岗位顺序推荐岗位。"],
       jobs: ["岗位信息", "浏览全部岗位，支持手动输入地点、关键词和学历筛选。"],
+      myJobs: ["我的岗位", "管理你自己补充的意向岗位，适合做投递跟进和面试准备。"],
       interview: ["面试情报", "生成面经检索入口，并把粘贴的面经整理成笔试、面试和准备建议。"],
+      watchlist: ["待发布", "按往年发布时间记录待跟踪企业，提醒自己定期检查官方招聘页。"],
       favorites: ["已收藏岗位", "把感兴趣的机会先收起来，稍后集中比较。"],
       applied: ["已投递岗位", "记录已投递机会，管理后续笔试、面试和跟进。"]
     };
@@ -1590,6 +1740,14 @@
       els.jobDialog.addEventListener("click", (event) => {
         if (event.target === els.jobDialog) closeJob();
       });
+      els.openAddJob.addEventListener("click", openAddJobDialog);
+      els.closeAddJob.addEventListener("click", closeAddJobDialog);
+      els.cancelAddJob.addEventListener("click", closeAddJobDialog);
+      els.parseAddJob.addEventListener("click", parseAddJobText);
+      els.saveAddJob.addEventListener("click", saveUserJob);
+      els.addJobDialog.addEventListener("click", (event) => {
+        if (event.target === els.addJobDialog) closeAddJobDialog();
+      });
 
       els.addTodayTodo.addEventListener("click", () => openTodoDialog(selectedTodoDate));
       els.closeTodo.addEventListener("click", closeTodo);
@@ -1597,6 +1755,7 @@
       els.saveTodo.addEventListener("click", saveTodo);
       els.generateInterviewSearch.addEventListener("click", renderInterviewLinks);
       els.summarizeInterview.addEventListener("click", renderInterviewSummary);
+      els.saveWatchItem.addEventListener("click", saveWatchItem);
     }
 
     async function loadExternalJobs() {
@@ -1614,7 +1773,7 @@
       }
     }
 
-    function normalizeJob(raw, index) {
+    function normalizeJob(raw, index = 0) {
       const today = todayString();
       const deadline = raw.deadline || raw["截止时间"] || "";
       return {
@@ -1661,6 +1820,8 @@
       renderSavedLists();
       renderHomeRecommended();
       renderProfileAnalysis();
+      renderMyJobs();
+      renderWatchlist();
     }
 
     function renderDailyEncouragement() {
@@ -1798,8 +1959,8 @@
     }
 
     function renderSavedLists() {
-      const favorites = jobs.filter(isFavorite);
-      const applied = jobs.filter(isApplied);
+      const favorites = allManageableJobs().filter(isFavorite);
+      const applied = allManageableJobs().filter(isApplied);
       els.favoriteList.innerHTML = favorites.length
         ? favorites.map((job) => miniJobCard(job)).join("")
         : `<div class="empty">还没有收藏岗位。</div>`;
@@ -1825,10 +1986,21 @@
     function bindMiniCards(container) {
       container.querySelectorAll("[data-open-job]").forEach((card) => {
         card.addEventListener("click", () => {
-          const job = jobs.find((item) => getJobKey(item) === card.dataset.openJob);
+          const job = allManageableJobs().find((item) => getJobKey(item) === card.dataset.openJob);
           if (job) openJob(job);
         });
       });
+    }
+
+    function renderMyJobs() {
+      els.myJobList.innerHTML = userJobs.length
+        ? userJobs.map((job) => miniJobCard(job)).join("")
+        : `<div class="empty">还没有自己新增的岗位。点击“新增岗位”，把你在其他平台看到的意向岗位保存进来。</div>`;
+      bindMiniCards(els.myJobList);
+    }
+
+    function allManageableJobs() {
+      return jobs.concat(userJobs);
     }
 
     function jobActions(job) {
@@ -2395,6 +2567,134 @@
       `;
     }
 
+    function openAddJobDialog() {
+      clearAddJobForm();
+      els.addJobDialog.showModal();
+    }
+
+    function closeAddJobDialog() {
+      els.addJobDialog.close();
+    }
+
+    function clearAddJobForm() {
+      [els.addJobText, els.addJobLink, els.addCompany, els.addRole, els.addCity, els.addDegree, els.addType, els.addDeadline].forEach((input) => {
+        input.value = "";
+      });
+      els.addJobImage.value = "";
+      els.addJobStatus.textContent = "图片第一版仅作为备注保存；岗位字段可自动识别，也可以手动修改。";
+    }
+
+    function parseAddJobText() {
+      const text = [els.addJobText.value, els.addJobLink.value].join("\n").trim();
+      if (!text) {
+        els.addJobStatus.textContent = "先粘贴岗位正文或填写链接，再识别。";
+        return;
+      }
+      const parsed = inferJobFromText(text);
+      if (parsed.company && !els.addCompany.value) els.addCompany.value = parsed.company;
+      if (parsed.role && !els.addRole.value) els.addRole.value = parsed.role;
+      if (parsed.city && !els.addCity.value) els.addCity.value = parsed.city;
+      if (parsed.degree && !els.addDegree.value) els.addDegree.value = parsed.degree;
+      if (parsed.type && !els.addType.value) els.addType.value = parsed.type;
+      if (parsed.deadline && !els.addDeadline.value) els.addDeadline.value = parsed.deadline;
+      if (parsed.link && !els.addJobLink.value) els.addJobLink.value = parsed.link;
+      els.addJobStatus.textContent = "已尝试识别字段，可继续手动修改后保存。";
+    }
+
+    function saveUserJob() {
+      parseAddJobText();
+      const now = todayString();
+      const rawText = els.addJobText.value.trim();
+      const job = normalizeJob({
+        id: `user-${Date.now()}`,
+        company: els.addCompany.value.trim() || "未填写企业",
+        nature: "我的补充",
+        role: els.addRole.value.trim() || "未填写岗位",
+        type: els.addType.value.trim() || "待确认",
+        city: els.addCity.value.trim() || "待确认",
+        degree: els.addDegree.value.trim() || "待确认",
+        major: "待确认",
+        target: "自定义",
+        deadline: els.addDeadline.value.trim(),
+        status: autoStatus(els.addDeadline.value.trim(), now),
+        salary: "待确认",
+        source: "我的补充岗位",
+        updated: now,
+        link: els.addJobLink.value.trim() || "#",
+        responsibilities: rawText ? toList(rawText).slice(0, 8) : ["用户自行补充，待进一步整理。"],
+        requirements: rawText ? toList(rawText).slice(0, 8) : ["用户自行补充，待进一步整理。"],
+        imageNote: els.addJobImage.files[0]?.name || ""
+      });
+      userJobs.unshift(job);
+      localStorage.setItem(USER_JOBS_KEY, JSON.stringify(userJobs));
+      closeAddJobDialog();
+      switchView("myJobs");
+      renderAll();
+    }
+
+    function inferJobFromText(text) {
+      const value = String(text || "");
+      const url = (value.match(/https?:\/\/[^\s，。；]+/) || [""])[0];
+      const degree = value.includes("博士") ? "博士" : value.includes("硕士") || value.includes("研究生") ? "硕士及以上" : value.includes("本科") ? "本科及以上" : value.includes("专科") || value.includes("大专") ? "专科及以上" : "";
+      const deadline = (value.match(/20[2-3][0-9][-/.年]\d{1,2}[-/.月]\d{1,2}/) || [""])[0].replace(/[年月/.]/g, "-").replace(/日$/, "");
+      const type = value.includes("暑期实习") ? "暑期实习" : value.includes("日常实习") ? "日常实习" : value.includes("实习") ? "实习" : value.includes("提前批") ? "提前批" : value.includes("补录") ? "补录" : value.includes("校招") || value.includes("全职") ? "正职" : "";
+      const city = inferCity(value);
+      const company = inferLabeledText(value, ["企业", "公司", "单位", "招聘方"]) || (value.match(/[\u4e00-\u9fa5A-Za-z0-9]{2,30}(公司|集团|银行|科技|股份|有限|研究院|学校|医院)/) || [""])[0];
+      const role = inferLabeledText(value, ["岗位", "职位", "招聘岗位", "职位名称"]) || (value.match(/[\u4e00-\u9fa5A-Za-z0-9]{2,24}(工程师|产品经理|运营|管培生|分析师|设计师|专员|助理|实习生)/) || [""])[0];
+      return { company, role, city, degree, type, deadline, link: url };
+    }
+
+    function inferLabeledText(text, labels) {
+      for (const label of labels) {
+        const match = String(text).match(new RegExp(`${label}[:：\\s]*([^\\n，。；;]{2,40})`));
+        if (match) return match[1].trim();
+      }
+      return "";
+    }
+
+    function inferCity(text) {
+      const cities = ["北京", "上海", "广州", "深圳", "杭州", "南京", "苏州", "成都", "重庆", "武汉", "西安", "天津", "长沙", "合肥", "厦门", "青岛", "济南", "郑州", "宁波", "无锡", "佛山", "东莞", "全国", "远程"];
+      return cities.filter((city) => text.includes(city)).slice(0, 6).join("、");
+    }
+
+    function saveWatchItem() {
+      const item = {
+        id: `watch-${Date.now()}`,
+        company: els.watchCompany.value.trim(),
+        role: els.watchRole.value.trim(),
+        lastDate: els.watchLastDate.value.trim(),
+        window: els.watchWindow.value.trim(),
+        link: els.watchLink.value.trim(),
+        status: els.watchStatus.value,
+        updated: todayString()
+      };
+      if (!item.company && !item.role) return;
+      watchlist.unshift(item);
+      localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
+      [els.watchCompany, els.watchRole, els.watchLastDate, els.watchWindow, els.watchLink].forEach((input) => {
+        input.value = "";
+      });
+      els.watchStatus.value = "待跟踪";
+      renderWatchlist();
+    }
+
+    function renderWatchlist() {
+      els.watchList.innerHTML = watchlist.length
+        ? watchlist.map((item) => `
+          <article class="mini-card">
+            <h4>${escapeHtml(item.company || "未填写企业")} ${escapeHtml(item.role || "")}</h4>
+            <div class="tagline">
+              <span class="tag">${escapeHtml(item.status || "待跟踪")}</span>
+              <span class="tag">往年：${escapeHtml(item.lastDate || "待补充")}</span>
+              <span class="tag">关注：${escapeHtml(item.window || "待补充")}</span>
+            </div>
+            <div class="muted">更新时间：${escapeHtml(item.updated || "")}</div>
+            ${item.link ? `<div style="margin-top:10px;"><a class="btn" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer">检查官网</a></div>` : ""}
+          </article>
+        `).join("")
+        : `<div class="empty">还没有待跟踪企业。可以先添加去年 8 月前后发布校招的企业，提醒自己今年定期检查官网。</div>`;
+    }
+
     function renderCalendar() {
       const now = new Date();
       const year = now.getFullYear();
@@ -2600,6 +2900,15 @@
         return JSON.parse(localStorage.getItem(key) || "{}") || {};
       } catch (error) {
         return {};
+      }
+    }
+
+    function loadArray(key) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(value) ? value : [];
+      } catch (error) {
+        return [];
       }
     }
 
