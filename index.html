@@ -609,6 +609,34 @@
       gap: 10px;
     }
 
+    .auth-card {
+      margin-top: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .auth-card strong {
+      display: block;
+      color: #fff;
+      font-size: 14px;
+      word-break: break-all;
+    }
+
+    .auth-card span {
+      display: block;
+      margin: 4px 0 10px;
+      color: #c9c4bd;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .auth-card .btn {
+      width: 100%;
+      min-height: 36px;
+    }
+
     .profile-help {
       border: 1px dashed rgba(16, 16, 16, 0.2);
       border-radius: var(--radius);
@@ -1084,6 +1112,12 @@
         <button class="nav-btn" data-nav="favorites" type="button">已收藏岗位</button>
         <button class="nav-btn" data-nav="applied" type="button">已投递岗位</button>
       </nav>
+      <section class="auth-card">
+        <strong id="authTitle">未登录</strong>
+        <span id="authHint">登录后可跨设备同步个人信息、收藏、投递和待办。</span>
+        <button class="btn pink" id="openAuth" type="button">登录 / 注册</button>
+        <button class="btn" id="logoutAuth" type="button" hidden>退出登录</button>
+      </section>
     </aside>
 
     <main class="main">
@@ -1473,6 +1507,39 @@
     </article>
   </dialog>
 
+  <dialog id="authDialog">
+    <article class="modal">
+      <header class="modal-head">
+        <div class="modal-title-row">
+          <div>
+            <div class="company">账号同步</div>
+            <h2>登录 / 注册</h2>
+          </div>
+          <button class="close" id="closeAuth" type="button" aria-label="关闭">×</button>
+        </div>
+      </header>
+      <div class="modal-body">
+        <div class="profile-help">使用邮箱创建账号后，你的个人信息、收藏、已投递、我的岗位和待办会同步到云端。已有本地数据会在首次登录后自动迁移。</div>
+        <div class="field" style="margin-top: 14px;">
+          <label for="authEmail">邮箱</label>
+          <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com">
+        </div>
+        <div class="field" style="margin-top: 12px;">
+          <label for="authPassword">密码</label>
+          <input id="authPassword" type="password" autocomplete="current-password" placeholder="至少 6 位">
+        </div>
+        <div class="profile-help" style="margin-top: 12px;" id="authStatus">第一次使用请点击“注册账号”。如果 Supabase 开启了邮箱确认，请到邮箱里点确认链接。</div>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn" id="cancelAuth" type="button">取消</button>
+        <div class="btn-row">
+          <button class="btn" id="loginAuth" type="button">登录</button>
+          <button class="btn primary" id="signupAuth" type="button">注册账号</button>
+        </div>
+      </footer>
+    </article>
+  </dialog>
+
   <dialog id="addJobDialog">
     <article class="modal">
       <header class="modal-head">
@@ -1545,8 +1612,12 @@
     </article>
   </dialog>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const DATA_ENDPOINT = "jobs-data.json";
+    const SUPABASE_URL = "https://znskbgxrafdxrtouzrou.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_rBAJXDSQsafrWscFiFs42A_iXeHH-Wc";
+    const CLOUD_STATE_TABLE = "user_state";
     const MAX_RENDERED_JOBS = 200;
     const FAVORITES_KEY = "graduateJobFavorites";
     const APPLIED_KEY = "graduateJobApplied";
@@ -1568,6 +1639,10 @@
     let addJobImageFiles = [];
     let interviewImageFiles = [];
     let tesseractLoader = null;
+    let supabaseClient = null;
+    let currentUser = null;
+    let cloudReady = false;
+    let cloudSaveTimer = null;
 
     const fallbackJobs = [
       {
@@ -1728,6 +1803,18 @@
       viewTitle: document.querySelector("#viewTitle"),
       viewSubtitle: document.querySelector("#viewSubtitle"),
       syncStatus: document.querySelector("#syncStatus"),
+      authTitle: document.querySelector("#authTitle"),
+      authHint: document.querySelector("#authHint"),
+      openAuth: document.querySelector("#openAuth"),
+      logoutAuth: document.querySelector("#logoutAuth"),
+      authDialog: document.querySelector("#authDialog"),
+      closeAuth: document.querySelector("#closeAuth"),
+      cancelAuth: document.querySelector("#cancelAuth"),
+      authEmail: document.querySelector("#authEmail"),
+      authPassword: document.querySelector("#authPassword"),
+      authStatus: document.querySelector("#authStatus"),
+      loginAuth: document.querySelector("#loginAuth"),
+      signupAuth: document.querySelector("#signupAuth"),
       encourageTitle: document.querySelector("#encourageTitle"),
       encourageText: document.querySelector("#encourageText"),
       metricToday: document.querySelector("#metricToday"),
@@ -1852,6 +1939,8 @@
 
     async function init() {
       bindEvents();
+      initSupabase();
+      await restoreAuthSession();
       fillProfileForm();
       renderIntentChips();
       await loadExternalJobs();
@@ -1865,6 +1954,16 @@
       });
       document.querySelectorAll("[data-nav-jump]").forEach((button) => {
         button.addEventListener("click", () => switchView(button.dataset.navJump));
+      });
+
+      els.openAuth.addEventListener("click", openAuthDialog);
+      els.logoutAuth.addEventListener("click", logoutAuth);
+      els.closeAuth.addEventListener("click", closeAuthDialog);
+      els.cancelAuth.addEventListener("click", closeAuthDialog);
+      els.loginAuth.addEventListener("click", loginAuth);
+      els.signupAuth.addEventListener("click", signupAuth);
+      els.authDialog.addEventListener("click", (event) => {
+        if (event.target === els.authDialog) closeAuthDialog();
       });
 
       [els.keyword, els.city, els.nature, els.jobType, els.degree, els.status].forEach((item) => {
@@ -1951,6 +2050,190 @@
       } catch (error) {
         jobs = fallbackJobs;
         els.syncStatus.textContent = "数据说明：暂未加载公开招聘信息，当前展示示例数据。";
+      }
+    }
+
+    function initSupabase() {
+      if (!window.supabase || !SUPABASE_URL || !SUPABASE_KEY) {
+        setAuthUi(null, "账号同步未连接");
+        return;
+      }
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+        currentUser = session?.user || null;
+        setAuthUi(currentUser);
+        if (currentUser) {
+          await loadCloudState();
+          fillProfileForm();
+          renderIntentChips();
+          renderAll();
+        }
+      });
+    }
+
+    async function restoreAuthSession() {
+      if (!supabaseClient) return;
+      try {
+        const { data } = await supabaseClient.auth.getSession();
+        currentUser = data.session?.user || null;
+        setAuthUi(currentUser);
+        if (currentUser) await loadCloudState();
+      } catch (error) {
+        setAuthUi(null, "账号同步暂时不可用");
+      }
+    }
+
+    function openAuthDialog() {
+      els.authStatus.textContent = "第一次使用请点击“注册账号”。如果 Supabase 开启了邮箱确认，请到邮箱里点确认链接。";
+      els.authDialog.showModal();
+    }
+
+    function closeAuthDialog() {
+      els.authDialog.close();
+    }
+
+    async function signupAuth() {
+      const email = els.authEmail.value.trim();
+      const password = els.authPassword.value;
+      if (!email || password.length < 6) {
+        els.authStatus.textContent = "请填写邮箱，并设置至少 6 位密码。";
+        return;
+      }
+      if (!supabaseClient) {
+        els.authStatus.textContent = "Supabase 未连接，请检查配置。";
+        return;
+      }
+      els.authStatus.textContent = "正在注册...";
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) {
+        els.authStatus.textContent = `注册失败：${error.message}`;
+        return;
+      }
+      currentUser = data.user || currentUser;
+      els.authStatus.textContent = data.session ? "注册成功，正在同步本地数据..." : "注册成功，请先到邮箱确认账号，然后回来登录。";
+      if (data.session) {
+        await saveCloudStateNow();
+        closeAuthDialog();
+      }
+    }
+
+    async function loginAuth() {
+      const email = els.authEmail.value.trim();
+      const password = els.authPassword.value;
+      if (!email || !password) {
+        els.authStatus.textContent = "请填写邮箱和密码。";
+        return;
+      }
+      if (!supabaseClient) {
+        els.authStatus.textContent = "Supabase 未连接，请检查配置。";
+        return;
+      }
+      els.authStatus.textContent = "正在登录...";
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        els.authStatus.textContent = `登录失败：${error.message}`;
+        return;
+      }
+      currentUser = data.user;
+      await loadCloudState();
+      closeAuthDialog();
+      setAuthUi(currentUser);
+      fillProfileForm();
+      renderIntentChips();
+      renderAll();
+    }
+
+    async function logoutAuth() {
+      if (supabaseClient) await supabaseClient.auth.signOut();
+      currentUser = null;
+      cloudReady = false;
+      setAuthUi(null);
+    }
+
+    function setAuthUi(user, hint) {
+      if (user) {
+        els.authTitle.textContent = user.email || "已登录";
+        els.authHint.textContent = "账号同步已开启，个人数据会保存到云端。";
+        els.openAuth.hidden = true;
+        els.logoutAuth.hidden = false;
+      } else {
+        els.authTitle.textContent = "未登录";
+        els.authHint.textContent = hint || "登录后可跨设备同步个人信息、收藏、投递和待办。";
+        els.openAuth.hidden = false;
+        els.logoutAuth.hidden = true;
+      }
+    }
+
+    function captureLocalState() {
+      return {
+        profile,
+        favoriteIds: [...favoriteIds],
+        appliedIds: [...appliedIds],
+        appliedMeta: loadObject(`${APPLIED_KEY}:meta`),
+        userJobs,
+        todos,
+        watchlist: [...watchlist]
+      };
+    }
+
+    function applyCloudState(state) {
+      if (!state || typeof state !== "object") return;
+      profile = state.profile || {};
+      favoriteIds = new Set(Array.isArray(state.favoriteIds) ? state.favoriteIds : []);
+      appliedIds = new Set(Array.isArray(state.appliedIds) ? state.appliedIds : []);
+      userJobs = Array.isArray(state.userJobs) ? state.userJobs.map(normalizeJob) : [];
+      todos = state.todos && typeof state.todos === "object" ? state.todos : {};
+      watchlist = new Set(Array.isArray(state.watchlist) ? state.watchlist : []);
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favoriteIds]));
+      localStorage.setItem(APPLIED_KEY, JSON.stringify([...appliedIds]));
+      localStorage.setItem(`${APPLIED_KEY}:meta`, JSON.stringify(state.appliedMeta || {}));
+      localStorage.setItem(USER_JOBS_KEY, JSON.stringify(userJobs));
+      localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+      localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlist]));
+    }
+
+    async function loadCloudState() {
+      if (!supabaseClient || !currentUser) return;
+      const { data, error } = await supabaseClient
+        .from(CLOUD_STATE_TABLE)
+        .select("state")
+        .eq("user_id", currentUser.id)
+        .maybeSingle();
+      if (error) {
+        els.authHint.textContent = "已登录，但云端表还没创建；请先执行 SQL 建表。";
+        cloudReady = false;
+        return;
+      }
+      cloudReady = true;
+      if (data?.state) {
+        applyCloudState(data.state);
+      } else {
+        await saveCloudStateNow();
+      }
+    }
+
+    function queueCloudSave() {
+      if (!cloudReady || !currentUser || !supabaseClient) return;
+      window.clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = window.setTimeout(saveCloudStateNow, 600);
+    }
+
+    async function saveCloudStateNow() {
+      if (!currentUser || !supabaseClient) return;
+      const { error } = await supabaseClient
+        .from(CLOUD_STATE_TABLE)
+        .upsert({
+          user_id: currentUser.id,
+          state: captureLocalState(),
+          updated_at: new Date().toISOString()
+        }, { onConflict: "user_id" });
+      if (error) {
+        els.authHint.textContent = "已登录，但同步失败；请确认已执行 SQL 建表。";
+        cloudReady = false;
+      } else {
+        cloudReady = true;
+        els.authHint.textContent = "账号同步已开启，个人数据会保存到云端。";
       }
     }
 
@@ -2293,6 +2576,7 @@
       if (favoriteIds.has(key)) favoriteIds.delete(key);
       else favoriteIds.add(key);
       saveSet(FAVORITES_KEY, favoriteIds);
+      queueCloudSave();
       renderAll();
       if (els.jobDialog.open) openJob(job);
     }
@@ -2311,6 +2595,7 @@
         localStorage.setItem(`${APPLIED_KEY}:meta`, JSON.stringify(meta));
       }
       saveSet(APPLIED_KEY, appliedIds);
+      queueCloudSave();
       renderAll();
       if (els.jobDialog.open) openJob(job);
     }
@@ -2360,6 +2645,7 @@
         portfolio: els.profilePortfolio.value.trim()
       };
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      queueCloudSave();
       renderAll();
       switchView(nextView);
     }
@@ -2367,6 +2653,7 @@
     function clearProfile() {
       profile = {};
       localStorage.removeItem(PROFILE_KEY);
+      queueCloudSave();
       fillProfileForm();
       renderIntentChips();
       renderAll();
@@ -2379,6 +2666,7 @@
       if (!profile.intents.includes(text)) profile.intents.push(text);
       els.intentInput.value = "";
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      queueCloudSave();
       renderIntentChips();
       renderAll();
     }
@@ -2387,6 +2675,7 @@
       profile.intents = profile.intents || [];
       profile.intents.splice(index, 1);
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+      queueCloudSave();
       renderIntentChips();
       renderAll();
     }
@@ -2927,6 +3216,7 @@
       });
       userJobs.unshift(job);
       localStorage.setItem(USER_JOBS_KEY, JSON.stringify(userJobs));
+      queueCloudSave();
       closeAddJobDialog();
       switchView("myJobs");
       renderAll();
@@ -3009,6 +3299,7 @@
         watchlist.add(id);
       }
       localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlist]));
+      queueCloudSave();
       renderWatchlist();
     }
 
@@ -3103,6 +3394,7 @@
 
     function saveTodos() {
       localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+      queueCloudSave();
     }
 
     function makeTags(job) {
