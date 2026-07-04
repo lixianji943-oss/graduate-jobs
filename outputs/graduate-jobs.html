@@ -1186,7 +1186,7 @@
           <div>
             <div class="stats-grid">
               <div class="stat-card yellow"><strong id="metricToday">0</strong><span>每日新增岗位</span></div>
-              <div class="stat-card pink"><strong id="metricTotal">0</strong><span>浏览岗位</span></div>
+              <div class="stat-card pink"><strong id="metricTotal">0</strong><span>岗位总数</span></div>
               <div class="stat-card green"><strong id="metricFavorites">0</strong><span>收藏岗位</span></div>
               <div class="stat-card blue"><strong id="metricApplied">0</strong><span>已投递岗位</span></div>
             </div>
@@ -2079,12 +2079,16 @@
     async function init() {
       bindEvents();
       initSupabase();
-      await restoreAuthSession();
       fillProfileForm();
       renderIntentChips();
       await loadExternalJobs();
       rebuildFilters();
       renderAll();
+      restoreAuthSession().then(() => {
+        fillProfileForm();
+        renderIntentChips();
+        renderAll();
+      });
     }
 
     function bindEvents() {
