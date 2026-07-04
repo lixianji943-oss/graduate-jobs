@@ -247,6 +247,13 @@
       font-size: 13px;
     }
 
+    .save-status {
+      min-height: 20px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
     .filters {
       display: grid;
       grid-template-columns: 1.4fr repeat(5, minmax(120px, 1fr));
@@ -1436,6 +1443,7 @@
               <span class="muted" id="resumeStatus">上传简历后自动填充</span>
             </div>
             <div class="btn-row">
+              <span class="save-status" id="profileSaveStatus" aria-live="polite"></span>
               <button class="btn" id="clearProfile" type="button">清空</button>
               <button class="btn pink" id="recommendFromProfile" type="button">为我推荐</button>
               <button class="btn primary" id="saveProfile" type="button">保存信息</button>
@@ -2177,6 +2185,7 @@
       profileExperience: document.querySelector("#profileExperience"),
       profilePortfolio: document.querySelector("#profilePortfolio"),
       profileAnalysis: document.querySelector("#profileAnalysis"),
+      profileSaveStatus: document.querySelector("#profileSaveStatus"),
       saveProfile: document.querySelector("#saveProfile"),
       recommendFromProfile: document.querySelector("#recommendFromProfile"),
       clearProfile: document.querySelector("#clearProfile"),
@@ -2328,7 +2337,7 @@
       });
       els.intentInput.addEventListener("blur", () => addIntent(els.intentInput.value));
       els.resumeFile.addEventListener("change", handleResumeUpload);
-      els.saveProfile.addEventListener("click", saveProfileFromForm);
+      els.saveProfile.addEventListener("click", () => saveProfileFromForm("profile"));
       els.recommendFromProfile.addEventListener("click", () => {
         saveProfileFromForm("jobs");
         showingRecommended = true;
@@ -3273,7 +3282,7 @@
       els.profilePortfolio.value = profile.portfolio || "";
     }
 
-    function saveProfileFromForm(nextView = "home") {
+    function saveProfileFromForm(nextView = "profile") {
       profile = {
         name: els.profileName.value.trim(),
         age: els.profileAge.value.trim(),
@@ -3293,6 +3302,13 @@
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
       queueCloudSave();
       renderAll();
+      if (els.profileSaveStatus) {
+        els.profileSaveStatus.textContent = "\u5df2\u66f4\u65b0\u5e76\u4fdd\u5b58";
+        window.clearTimeout(saveProfileFromForm.timer);
+        saveProfileFromForm.timer = window.setTimeout(() => {
+          if (els.profileSaveStatus) els.profileSaveStatus.textContent = "";
+        }, 2600);
+      }
       switchView(nextView);
     }
 
