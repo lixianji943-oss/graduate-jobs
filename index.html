@@ -790,6 +790,50 @@
       line-height: 1.6;
     }
 
+    .job-state {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .job-state.active {
+      color: #7a5600;
+      background: var(--yellow-soft);
+      border: 1px solid rgba(244, 216, 95, 0.85);
+    }
+
+    .job-state.success {
+      color: var(--green);
+      background: var(--green-soft);
+      border: 1px solid rgba(29, 128, 108, 0.38);
+    }
+
+    .job-state.ended {
+      color: #8f3a6f;
+      background: var(--pink-soft);
+      border: 1px solid rgba(242, 169, 214, 0.72);
+    }
+
+    .mini-card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .btn.danger {
+      border-color: rgba(143, 58, 111, 0.35);
+      color: #8f3a6f;
+      background: var(--pink-soft);
+    }
+
     .progress-legend {
       display: flex;
       flex-wrap: wrap;
@@ -1731,6 +1775,14 @@
         </div>
         <div class="interview-grid" style="margin-top: 12px;">
           <div class="field">
+            <label for="progressOverallStatus">&#25972;&#20307;&#25237;&#36882;&#29366;&#24577;</label>
+            <select id="progressOverallStatus">
+              <option value="active">&#36827;&#34892;&#20013;</option>
+              <option value="success">&#24050;&#25104;&#21151;</option>
+              <option value="ended">&#24050;&#32467;&#26463;</option>
+            </select>
+          </div>
+          <div class="field">
             <label for="progressStageName">当前阶段名称</label>
             <input id="progressStageName" type="text">
           </div>
@@ -2190,6 +2242,7 @@
       cancelProgress: document.querySelector("#cancelProgress"),
       saveProgress: document.querySelector("#saveProgress"),
       progressStages: document.querySelector("#progressStages"),
+      progressOverallStatus: document.querySelector("#progressOverallStatus"),
       progressStageName: document.querySelector("#progressStageName"),
       progressStageStatus: document.querySelector("#progressStageStatus"),
       progressStageNote: document.querySelector("#progressStageNote")
@@ -2656,10 +2709,11 @@
     function renderHomeProgress() {
       const list = allManageableJobs().filter((job) => isApplied(job) || hasProgress(job)).slice(0, 5);
       els.homeProgress.innerHTML = list.length
-        ? list.map((job) => miniJobCard(job, true)).join("")
+        ? list.map((job) => miniJobCard(job, { context: "progress", showAppliedDate: true })).join("")
         : `<div class="empty">标记已投递后，这里会显示企业、岗位和当前进度。</div>`;
       bindMiniCards(els.homeProgress);
       bindProgressButtons(els.homeProgress);
+      bindCardActionButtons(els.homeProgress);
     }
 
     function renderHomeWatchTips() {
@@ -2784,33 +2838,50 @@
       const favorites = allManageableJobs().filter(isFavorite);
       const applied = allManageableJobs().filter(isApplied);
       els.favoriteList.innerHTML = favorites.length
-        ? favorites.map((job) => miniJobCard(job)).join("")
-        : `<div class="empty">还没有收藏岗位。</div>`;
+        ? favorites.map((job) => miniJobCard(job, { context: "favorite" })).join("")
+        : `<div class="empty">&#36824;&#27809;&#26377;&#25910;&#34255;&#23703;&#20301;&#12290;</div>`;
       els.appliedList.innerHTML = applied.length
-        ? applied.map((job) => miniJobCard(job, true)).join("")
-        : `<div class="empty">还没有标记已投递岗位。</div>`;
+        ? applied.map((job) => miniJobCard(job, { context: "applied", showAppliedDate: true })).join("")
+        : `<div class="empty">&#36824;&#27809;&#26377;&#25237;&#36882;&#23703;&#20301;&#12290;</div>`;
       bindMiniCards(els.favoriteList);
       bindMiniCards(els.appliedList);
       bindProgressButtons(els.favoriteList);
       bindProgressButtons(els.appliedList);
+      bindCardActionButtons(els.favoriteList);
+      bindCardActionButtons(els.appliedList);
     }
 
-    function miniJobCard(job, showAppliedDate = false) {
+    function miniJobCard(job, options = {}) {
+      const showAppliedDate = options === true || options.showAppliedDate;
+      const context = typeof options === "object" ? options.context || "" : "";
       const applied = getAppliedMeta(job);
       const progress = getProgress(job);
       const current = currentProgressStage(progress);
+      const tracked = isApplied(job) || hasProgress(job);
       return `
         <article class="mini-card" data-open-job="${escapeAttr(getJobKey(job))}">
           <h4 class="clamp two">${escapeHtml(job.role)}</h4>
           <div class="muted">${escapeHtml(job.company)} &middot; ${escapeHtml(job.city)}</div>
           <div class="tagline">${makeTags(job)}</div>
-          ${showAppliedDate && applied ? `<div class="muted" style="margin-top:8px;">\u6295\u9012\u65e5\u671f\uff1a${escapeHtml(applied.date)}</div>` : ""}
-          ${(isApplied(job) || hasProgress(job)) ? `
-            <div class="progress-note">\u5f53\u524d\u8fdb\u5ea6\uff1a${escapeHtml(current.name)} &middot; ${escapeHtml(PROGRESS_STATUS_TEXT[current.status] || "\u672a\u5f00\u59cb")}</div>
+          ${showAppliedDate && applied ? `<div class="muted" style="margin-top:8px;">&#25237;&#36882;&#26102;&#38388;&#65306;${escapeHtml(applied.date)}</div>` : ""}
+          ${tracked ? `
+            <div class="mini-card-actions">
+              ${jobStateBadge(progress.overallStatus)}
+              ${cardCancelButton(job, context)}
+            </div>
+            <div class="progress-note">&#24403;&#21069;&#38454;&#27573;&#65306;${escapeHtml(current.name)} &middot; ${escapeHtml(PROGRESS_STATUS_TEXT[current.status] || "&#26410;&#30693;")}</div>
             ${progressLineHtml(job)}
-          ` : ""}
+          ` : `<div class="mini-card-actions">${cardCancelButton(job, context)}</div>`}
         </article>
       `;
+    }
+
+    function cardCancelButton(job, context) {
+      const key = escapeAttr(getJobKey(job));
+      if (context === "favorite") return `<button class="btn danger" type="button" data-cancel-favorite="${key}">&#21462;&#28040;&#25910;&#34255;</button>`;
+      if (context === "applied") return `<button class="btn danger" type="button" data-cancel-applied="${key}">&#21462;&#28040;&#25237;&#36882;</button>`;
+      if (context === "progress") return `<button class="btn danger" type="button" data-cancel-progress="${key}">&#21462;&#28040;&#36827;&#24230;</button>`;
+      return "";
     }
 
     function bindMiniCards(container) {
@@ -2828,6 +2899,30 @@
           event.stopPropagation();
           const job = allManageableJobs().find((item) => getJobKey(item) === button.dataset.progressJob);
           if (job) openProgressDialog(job, Number(button.dataset.progressIndex || 0));
+        });
+      });
+    }
+
+    function bindCardActionButtons(container) {
+      container.querySelectorAll("[data-cancel-favorite]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const job = allManageableJobs().find((item) => getJobKey(item) === button.dataset.cancelFavorite);
+          if (job) removeFavorite(job);
+        });
+      });
+      container.querySelectorAll("[data-cancel-applied]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const job = allManageableJobs().find((item) => getJobKey(item) === button.dataset.cancelApplied);
+          if (job) removeApplied(job);
+        });
+      });
+      container.querySelectorAll("[data-cancel-progress]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const job = allManageableJobs().find((item) => getJobKey(item) === button.dataset.cancelProgress);
+          if (job) removeProgress(job);
         });
       });
     }
@@ -2893,11 +2988,17 @@
         </div>
       `).join("");
       els.modalMatch.innerHTML = matchAnalysisHtml(analyzeJobMatch(job));
+      const modalProgress = getProgress(job);
       els.modalProgress.innerHTML = `
-        <div class="progress-note">点击阶段可以更新状态、记录经验。</div>
+        <div class="mini-card-actions">
+          ${jobStateBadge(modalProgress.overallStatus)}
+          ${hasProgress(job) ? `<button class="btn danger" type="button" data-cancel-progress="${escapeAttr(getJobKey(job))}">&#21462;&#28040;&#36827;&#24230;</button>` : ""}
+        </div>
+        <div class="progress-note">&#28857;&#20987;&#38454;&#27573;&#21487;&#20197;&#26356;&#26032;&#29366;&#24577;&#12289;&#35760;&#24405;&#32463;&#39564;&#12290;</div>
         ${progressLineHtml(job)}
       `;
       bindProgressButtons(els.modalProgress);
+      bindCardActionButtons(els.modalProgress);
       setList(els.modalResponsibilities, job.responsibilities);
       setList(els.modalRequirements, job.requirements);
       els.modalSalary.textContent = job.salary;
@@ -2963,6 +3064,7 @@
       const saved = progressMap[key];
       if (saved && Array.isArray(saved.stages) && saved.stages.length) {
         return {
+          overallStatus: saved.overallStatus || "active",
           stages: saved.stages.map((stage, index) => ({
             name: stage.name || DEFAULT_PROGRESS_STAGES[index] || `阶段${index + 1}`,
             status: stage.status || "none",
@@ -2972,6 +3074,7 @@
         };
       }
       return {
+        overallStatus: isApplied(job) ? "active" : "active",
         stages: DEFAULT_PROGRESS_STAGES.map((name, index) => ({
           name,
           status: isApplied(job) && index === 0 ? "pass" : "none",
@@ -2985,6 +3088,17 @@
       progressMap[getJobKey(job)] = progress;
       localStorage.setItem(PROGRESS_KEY, JSON.stringify(progressMap));
       queueCloudSave();
+    }
+
+    function jobStateLabel(status = "active") {
+      if (status === "success") return "已成功";
+      if (status === "ended") return "已结束";
+      return "进行中";
+    }
+
+    function jobStateBadge(status = "active") {
+      const safeStatus = ["active", "success", "ended"].includes(status) ? status : "active";
+      return `<span class="job-state ${safeStatus}">${jobStateLabel(safeStatus)}</span>`;
     }
 
     function ensureAppliedProgress(job) {
@@ -3030,6 +3144,7 @@
       editingProgress = { job, index: safeIndex };
       els.progressJobLabel.textContent = `${job.company} · ${job.role}`;
       els.progressStages.value = progress.stages.map((item) => item.name).join("、");
+      els.progressOverallStatus.value = progress.overallStatus || "active";
       els.progressStageName.value = stage.name || "";
       els.progressStageStatus.value = stage.status || "none";
       els.progressStageNote.value = stage.note || "";
@@ -3063,7 +3178,7 @@
         note: els.progressStageNote.value.trim(),
         updated: todayString()
       };
-      saveProgress(job, { stages });
+      saveProgress(job, { overallStatus: els.progressOverallStatus.value || "active", stages });
       closeProgressDialog();
       renderAll();
       if (els.jobDialog.open) openJob(job);
@@ -3079,6 +3194,14 @@
       if (els.jobDialog.open) openJob(job);
     }
 
+    function removeFavorite(job) {
+      favoriteIds.delete(getJobKey(job));
+      saveSet(FAVORITES_KEY, favoriteIds);
+      queueCloudSave();
+      renderAll();
+      if (els.jobDialog.open) openJob(job);
+    }
+
     function toggleApplied(job) {
       const key = getJobKey(job);
       if (appliedIds.has(key)) {
@@ -3086,6 +3209,8 @@
         const meta = loadObject(`${APPLIED_KEY}:meta`);
         delete meta[key];
         localStorage.setItem(`${APPLIED_KEY}:meta`, JSON.stringify(meta));
+        delete progressMap[key];
+        localStorage.setItem(PROGRESS_KEY, JSON.stringify(progressMap));
       } else {
         appliedIds.add(key);
         const meta = loadObject(`${APPLIED_KEY}:meta`);
@@ -3094,6 +3219,28 @@
         ensureAppliedProgress(job);
       }
       saveSet(APPLIED_KEY, appliedIds);
+      queueCloudSave();
+      renderAll();
+      if (els.jobDialog.open) openJob(job);
+    }
+
+    function removeApplied(job) {
+      const key = getJobKey(job);
+      appliedIds.delete(key);
+      const meta = loadObject(`${APPLIED_KEY}:meta`);
+      delete meta[key];
+      localStorage.setItem(`${APPLIED_KEY}:meta`, JSON.stringify(meta));
+      delete progressMap[key];
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progressMap));
+      saveSet(APPLIED_KEY, appliedIds);
+      queueCloudSave();
+      renderAll();
+      if (els.jobDialog.open) openJob(job);
+    }
+
+    function removeProgress(job) {
+      delete progressMap[getJobKey(job)];
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progressMap));
       queueCloudSave();
       renderAll();
       if (els.jobDialog.open) openJob(job);
