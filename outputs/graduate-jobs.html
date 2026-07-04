@@ -667,48 +667,93 @@
 
     .progress-line {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      flex-wrap: nowrap;
+      gap: 0;
       align-items: center;
       margin-top: 10px;
+      overflow-x: auto;
+      padding: 4px 2px 8px;
     }
 
     .progress-step {
-      min-height: 34px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 5px 10px;
+      position: relative;
+      flex: 1 0 86px;
+      min-height: 42px;
+      border: 0;
+      border-radius: 0;
+      padding: 23px 6px 0;
       color: #5f5548;
-      background: #fffdf8;
+      background: transparent;
       font-size: 12px;
       font-weight: 900;
       cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
     }
 
-    .progress-step.current {
-      border-color: #d3a708;
-      background: var(--yellow-soft);
-      color: #6a4b00;
+    .progress-step::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 10px;
+      height: 4px;
+      background: #ded4c7;
     }
 
-    .progress-step.pass,
-    .progress-step.offer {
-      border-color: rgba(29, 128, 108, 0.45);
-      background: var(--green-soft);
+    .progress-step::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 4px;
+      width: 16px;
+      height: 16px;
+      border: 3px solid #ded4c7;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      background: #fffdf8;
+      box-shadow: 0 0 0 3px #fffdf8;
+    }
+
+    .progress-step:first-child::before {
+      left: 50%;
+    }
+
+    .progress-step:last-child::before {
+      right: 50%;
+    }
+
+    .progress-step.pass::before,
+    .progress-step.pass::after,
+    .progress-step.offer::before,
+    .progress-step.offer::after {
+      background: var(--green);
+      border-color: var(--green);
       color: var(--green);
     }
 
-    .progress-step.fail {
-      border-color: rgba(242, 169, 214, 0.8);
-      background: var(--pink-soft);
+    .progress-step.fail::before,
+    .progress-step.fail::after {
+      background: var(--pink);
+      border-color: var(--pink);
       color: #8f3a6f;
     }
 
-    .progress-step.waiting {
-      border-color: rgba(244, 216, 95, 0.9);
-      background: #fff8d4;
+    .progress-step.waiting::before,
+    .progress-step.waiting::after {
+      background: var(--yellow);
+      border-color: var(--yellow);
       color: #7a5600;
     }
+
+    .progress-step.none::after {
+      background: #fffdf8;
+    }
+
+    .progress-step.pass,
+    .progress-step.offer { color: var(--green); }
+    .progress-step.fail { color: #8f3a6f; }
+    .progress-step.waiting { color: #7a5600; }
 
     .progress-note {
       margin-top: 8px;
@@ -716,6 +761,33 @@
       font-size: 12px;
       line-height: 1.6;
     }
+
+    .progress-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #51483d;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ded4c7;
+    }
+
+    .legend-dot.waiting { background: var(--yellow); }
+    .legend-dot.pass { background: var(--green); }
+    .legend-dot.fail { background: var(--pink); }
 
     .image-dropzone {
       min-height: 118px;
@@ -1219,6 +1291,12 @@
                 <h3>求职进度追踪</h3>
                 <button class="btn" data-nav-jump="applied" type="button">管理进度</button>
               </div>
+              <div class="progress-legend">
+                <span class="legend-item"><i class="legend-dot"></i>&#26410;&#24320;&#22987;</span>
+                <span class="legend-item"><i class="legend-dot waiting"></i>&#36827;&#34892;&#20013;/&#31561;&#21453;&#39304;</span>
+                <span class="legend-item"><i class="legend-dot pass"></i>&#36890;&#36807;</span>
+                <span class="legend-item"><i class="legend-dot fail"></i>&#26410;&#36890;&#36807;/&#24050;&#32467;&#26463;</span>
+              </div>
               <div class="card-list" id="homeProgress"></div>
             </section>
             <section class="panel" style="margin-top: 16px;">
@@ -1614,7 +1692,7 @@
       <div class="modal-body">
         <div class="field">
           <label for="progressStages">阶段流程（可编辑，用顿号/逗号分隔）</label>
-          <input id="progressStages" type="text" placeholder="已投递、测评/笔试、一面、二面、三面、谈薪、get">
+          <input id="progressStages" type="text" placeholder="&#24050;&#25237;&#36882;&#12289;&#27979;&#35780;/&#31508;&#35797;&#12289;&#19968;&#38754;&#12289;&#20108;&#38754;&#12289;&#19977;&#38754;&#12289;&#35848;&#34218;&#12289;offer">
         </div>
         <div class="interview-grid" style="margin-top: 12px;">
           <div class="field">
@@ -1628,11 +1706,17 @@
               <option value="waiting">进行中 / 等反馈</option>
               <option value="pass">通过</option>
               <option value="fail">未通过 / 已结束</option>
-              <option value="offer">get</option>
             </select>
           </div>
         </div>
         <div class="field" style="margin-top: 12px;">
+<!-- modal-progress-legend-added -->
+          <div class="progress-legend">
+            <span class="legend-item"><i class="legend-dot"></i>&#26410;&#24320;&#22987;</span>
+            <span class="legend-item"><i class="legend-dot waiting"></i>&#36827;&#34892;&#20013;/&#31561;&#21453;&#39304;</span>
+            <span class="legend-item"><i class="legend-dot pass"></i>&#36890;&#36807;</span>
+            <span class="legend-item"><i class="legend-dot fail"></i>&#26410;&#36890;&#36807;/&#24050;&#32467;&#26463;</span>
+          </div>
           <label for="progressStageNote">经验记录 / 复盘</label>
           <textarea id="progressStageNote" placeholder="例如：笔试题型、面试问题、自己回答不足、下一次准备方向"></textarea>
         </div>
@@ -2093,13 +2177,13 @@
       "已截止": "closed"
     };
 
-    const DEFAULT_PROGRESS_STAGES = ["已投递", "测评/笔试", "一面", "二面", "三面", "谈薪", "get"];
+    const DEFAULT_PROGRESS_STAGES = ["\u5df2\u6295\u9012", "\u6d4b\u8bc4/\u7b14\u8bd5", "\u4e00\u9762", "\u4e8c\u9762", "\u4e09\u9762", "\u8c08\u85aa", "offer"];
     const PROGRESS_STATUS_TEXT = {
-      none: "未开始",
-      waiting: "进行中",
-      pass: "已通过",
-      fail: "已复盘",
-      offer: "get"
+      none: "\u672a\u5f00\u59cb",
+      waiting: "\u8fdb\u884c\u4e2d/\u7b49\u53cd\u9988",
+      pass: "\u901a\u8fc7",
+      fail: "\u672a\u901a\u8fc7/\u5df2\u7ed3\u675f",
+      offer: "offer"
     };
 
     init();
@@ -2683,11 +2767,11 @@
       return `
         <article class="mini-card" data-open-job="${escapeAttr(getJobKey(job))}">
           <h4 class="clamp two">${escapeHtml(job.role)}</h4>
-          <div class="muted">${escapeHtml(job.company)} ? ${escapeHtml(job.city)}</div>
+          <div class="muted">${escapeHtml(job.company)} &middot; ${escapeHtml(job.city)}</div>
           <div class="tagline">${makeTags(job)}</div>
-          ${showAppliedDate && applied ? `<div class="muted" style="margin-top:8px;">?????${escapeHtml(applied.date)}</div>` : ""}
+          ${showAppliedDate && applied ? `<div class="muted" style="margin-top:8px;">\u6295\u9012\u65e5\u671f\uff1a${escapeHtml(applied.date)}</div>` : ""}
           ${(isApplied(job) || hasProgress(job)) ? `
-            <div class="progress-note">?????${escapeHtml(current.name)} ? ${escapeHtml(PROGRESS_STATUS_TEXT[current.status] || "???")}</div>
+            <div class="progress-note">\u5f53\u524d\u8fdb\u5ea6\uff1a${escapeHtml(current.name)} &middot; ${escapeHtml(PROGRESS_STATUS_TEXT[current.status] || "\u672a\u5f00\u59cb")}</div>
             ${progressLineHtml(job)}
           ` : ""}
         </article>
