@@ -459,6 +459,23 @@
       gap: 10px;
     }
 
+    .calendar-tools {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .calendar-tools select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px 8px;
+      background: #fffdf8;
+      font-weight: 800;
+    }
+
     .mini-card {
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -1233,7 +1250,13 @@
             <section class="panel">
               <div class="panel-head">
                 <h3>待办日历</h3>
-                <span class="muted" id="calendarMonth"></span>
+                <div class="calendar-tools">
+                  <button class="btn" id="prevMonth" type="button" aria-label="Previous month">&lsaquo;</button>
+                  <select id="calendarYear" aria-label="Select year"></select>
+                  <select id="calendarMonthSelect" aria-label="Select month"></select>
+                  <button class="btn" id="nextMonth" type="button" aria-label="Next month">&rsaquo;</button>
+                  <span class="muted" id="calendarMonth"></span>
+                </div>
               </div>
               <div class="calendar" id="calendarGrid"></div>
               <div class="panel-head" style="margin-top: 16px;">
@@ -1753,6 +1776,7 @@
     let watchlist = new Set([...loadSet(WATCHLIST_KEY)].filter((id) => typeof id === "string"));
     let progressMap = loadObject(PROGRESS_KEY);
     let selectedTodoDate = todayString();
+    let calendarCursor = new Date();
     let editingProgress = null;
     let addJobImageFiles = [];
     let interviewImageFiles = [];
@@ -1944,6 +1968,10 @@
       homeProgress: document.querySelector("#homeProgress"),
       homeWatchTips: document.querySelector("#homeWatchTips"),
       calendarMonth: document.querySelector("#calendarMonth"),
+      calendarYear: document.querySelector("#calendarYear"),
+      calendarMonthSelect: document.querySelector("#calendarMonthSelect"),
+      prevMonth: document.querySelector("#prevMonth"),
+      nextMonth: document.querySelector("#nextMonth"),
       calendarGrid: document.querySelector("#calendarGrid"),
       todoTitle: document.querySelector("#todoTitle"),
       todoList: document.querySelector("#todoList"),
@@ -2165,6 +2193,15 @@
       els.closeTodo.addEventListener("click", closeTodo);
       els.cancelTodo.addEventListener("click", closeTodo);
       els.saveTodo.addEventListener("click", saveTodo);
+      els.prevMonth.addEventListener("click", () => changeCalendarMonth(-1));
+      els.nextMonth.addEventListener("click", () => changeCalendarMonth(1));
+      els.calendarYear.addEventListener("change", updateCalendarFromSelects);
+      els.calendarMonthSelect.addEventListener("change", updateCalendarFromSelects);
+      document.addEventListener("keydown", (event) => {
+        if (event.target && ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) return;
+        if (event.key === "ArrowLeft") changeCalendarMonth(-1);
+        if (event.key === "ArrowRight") changeCalendarMonth(1);
+      });
       els.closeProgress.addEventListener("click", closeProgressDialog);
       els.cancelProgress.addEventListener("click", closeProgressDialog);
       els.saveProgress.addEventListener("click", saveProgressDialog);
@@ -2293,10 +2330,22 @@
     }
 
     async function logoutAuth() {
-      if (supabaseClient) await supabaseClient.auth.signOut();
+      currentUser = null;
+      cloudReady = false;
+      window.clearTimeout(cloudSaveTimer);
+      setAuthUi(null, "已退出登录。本机仍保留当前浏览器里的求职记录。");
+      try {
+        if (supabaseClient) {
+          await supabaseClient.auth.signOut({ scope: "local" });
+          await supabaseClient.auth.signOut();
+        }
+      } catch (error) {
+        console.warn("Logout fallback:", error);
+      }
       currentUser = null;
       cloudReady = false;
       setAuthUi(null);
+      renderAll();
     }
 
     function setAuthUi(user, hint) {
@@ -2507,13 +2556,14 @@
 
     function watchTipCard(item) {
       const tips = watchPrepareTips(item);
+      const added = isWatchTodoAdded(item);
       return `
         <article class="mini-card">
           <h4 class="clamp two">${escapeHtml(item.company)} · ${escapeHtml(item.role || "校招")}</h4>
           <div class="muted">关注窗口：${escapeHtml(item.window || "待补充")}</div>
           <div class="progress-note">${escapeHtml(tips[0])}</div>
           <div class="btn-row" style="margin-top:10px;">
-            <button class="btn pink" type="button" data-watch-todo="${escapeAttr(item.id)}">加入待办</button>
+            <button class="btn ${added ? "saved" : "pink"}" type="button" data-watch-todo="${escapeAttr(item.id)}">${added ? "已加入" : "加入待办"}</button>
             ${item.link ? `<a class="btn" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">打开官网</a>` : ""}
           </div>
         </article>
@@ -3596,15 +3646,24 @@
       });
     }
 
+    function watchTodoTexts(item) {
+      return [
+        `检查 ${item.company} 官方招聘页（关注窗口：${item.window || "待补充"}）`,
+        `${item.company} 准备：${watchPrepareTips(item)[0]}`
+      ];
+    }
+
+    function isWatchTodoAdded(item) {
+      const targets = watchTodoTexts(item);
+      return Object.values(todos).some((dayTodos) => Array.isArray(dayTodos) && targets.some((text) => dayTodos.some((todo) => todo.text === text)));
+    }
+
     function addWatchTodo(id) {
       const item = publicWatchlist.find((entry) => entry.id === id);
       if (!item) return;
       const date = selectedTodoDate || todayString();
       todos[date] = todos[date] || [];
-      const tasks = [
-        `检查 ${item.company} 官方招聘页（关注窗口：${item.window || "待补充"}）`,
-        `${item.company} 准备：${watchPrepareTips(item)[0]}`
-      ];
+      const tasks = watchTodoTexts(item);
       tasks.forEach((text) => {
         if (!todos[date].some((todo) => todo.text === text)) todos[date].push({ text, done: false });
       });
@@ -3634,7 +3693,7 @@
             <div class="btn-row" style="margin-top:10px;">
               ${item.link ? `<a class="btn primary" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer">打开官网</a>` : ""}
               <button class="btn" type="button" data-interview-company="${escapeAttr(item.company)}" data-interview-role="${escapeAttr(item.role)}">查面试情报</button>
-              <button class="btn pink" type="button" data-watch-todo="${escapeAttr(item.id)}">&#21152;&#20837;&#24453;&#21150;</button>
+              <button class="btn ${isWatchTodoAdded(item) ? "saved" : "pink"}" type="button" data-watch-todo="${escapeAttr(item.id)}">${isWatchTodoAdded(item) ? "\u5df2\u52a0\u5165" : "\u52a0\u5165\u5f85\u529e"}</button>
             </div>
           </article>
         `;
@@ -3671,10 +3730,10 @@
     }
 
     function renderCalendar() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      els.calendarMonth.textContent = `${year}年${month + 1}月`;
+      const year = calendarCursor.getFullYear();
+      const month = calendarCursor.getMonth();
+      renderCalendarSelectors(year, month);
+      els.calendarMonth.textContent = `${year}?${month + 1}?`;
       const first = new Date(year, month, 1);
       const startDay = first.getDay();
       const days = new Date(year, month + 1, 0).getDate();
@@ -3687,7 +3746,6 @@
       els.calendarGrid.innerHTML = cells.map((date) => {
         if (!date) return `<div></div>`;
         const dayTodos = todos[date] || [];
-        const done = dayTodos.filter((todo) => todo.done).length;
         return `
           <button class="day ${date === todayString() ? "today" : ""}" type="button" data-date="${date}">
             <div class="day-num">
@@ -3708,6 +3766,43 @@
           openTodoDialog(selectedTodoDate);
         });
       });
+    }
+
+    function renderCalendarSelectors(year, month) {
+      if (!els.calendarYear.options.length) {
+        const start = year - 3;
+        const end = year + 3;
+        for (let value = start; value <= end; value += 1) {
+          const option = document.createElement("option");
+          option.value = String(value);
+          option.textContent = String(value);
+          els.calendarYear.appendChild(option);
+        }
+      }
+      if (!els.calendarMonthSelect.options.length) {
+        for (let value = 0; value < 12; value += 1) {
+          const option = document.createElement("option");
+          option.value = String(value);
+          option.textContent = `${value + 1}?`;
+          els.calendarMonthSelect.appendChild(option);
+        }
+      }
+      els.calendarYear.value = String(year);
+      els.calendarMonthSelect.value = String(month);
+    }
+
+    function updateCalendarFromSelects() {
+      calendarCursor = new Date(Number(els.calendarYear.value), Number(els.calendarMonthSelect.value), 1);
+      selectedTodoDate = `${calendarCursor.getFullYear()}-${String(calendarCursor.getMonth() + 1).padStart(2, "0")}-01`;
+      renderCalendar();
+      renderTodoList();
+    }
+
+    function changeCalendarMonth(delta) {
+      calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + delta, 1);
+      selectedTodoDate = `${calendarCursor.getFullYear()}-${String(calendarCursor.getMonth() + 1).padStart(2, "0")}-01`;
+      renderCalendar();
+      renderTodoList();
     }
 
     function renderTodoList() {
