@@ -648,6 +648,58 @@
       line-height: 1.7;
     }
 
+    .progress-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .progress-step {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: #5f5548;
+      background: #fffdf8;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .progress-step.current {
+      border-color: #d3a708;
+      background: var(--yellow-soft);
+      color: #6a4b00;
+    }
+
+    .progress-step.pass,
+    .progress-step.offer {
+      border-color: rgba(29, 128, 108, 0.45);
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .progress-step.fail {
+      border-color: rgba(242, 169, 214, 0.8);
+      background: var(--pink-soft);
+      color: #8f3a6f;
+    }
+
+    .progress-step.waiting {
+      border-color: rgba(244, 216, 95, 0.9);
+      background: #fff8d4;
+      color: #7a5600;
+    }
+
+    .progress-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
     .image-dropzone {
       min-height: 118px;
       border: 1px dashed rgba(16, 16, 16, 0.28);
@@ -1145,6 +1197,20 @@
               </div>
               <div class="card-list" id="homeRecommended"></div>
             </section>
+            <section class="panel" style="margin-top: 16px;">
+              <div class="panel-head">
+                <h3>求职进度追踪</h3>
+                <button class="btn" data-nav-jump="applied" type="button">管理进度</button>
+              </div>
+              <div class="card-list" id="homeProgress"></div>
+            </section>
+            <section class="panel" style="margin-top: 16px;">
+              <div class="panel-head">
+                <h3>本月待发布提醒</h3>
+                <button class="btn" data-nav-jump="watchlist" type="button">查看全部</button>
+              </div>
+              <div class="card-list" id="homeWatchTips"></div>
+            </section>
           </div>
           <div>
             <section class="encourage-card">
@@ -1455,6 +1521,10 @@
           <div id="modalMatch" class="analysis-grid"></div>
         </section>
         <section class="section">
+          <h3>求职进度</h3>
+          <div id="modalProgress"></div>
+        </section>
+        <section class="section">
           <h3>岗位职责</h3>
           <ul id="modalResponsibilities"></ul>
         </section>
@@ -1503,6 +1573,51 @@
       <footer class="modal-foot">
         <button class="btn" id="cancelTodo" type="button">取消</button>
         <button class="btn primary" id="saveTodo" type="button">保存待办</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <dialog id="progressDialog">
+    <article class="modal">
+      <header class="modal-head">
+        <div class="modal-title-row">
+          <div>
+            <div class="company" id="progressJobLabel"></div>
+            <h2>编辑求职进度</h2>
+          </div>
+          <button class="close" id="closeProgress" type="button" aria-label="关闭">×</button>
+        </div>
+      </header>
+      <div class="modal-body">
+        <div class="field">
+          <label for="progressStages">阶段流程（可编辑，用顿号/逗号分隔）</label>
+          <input id="progressStages" type="text" placeholder="已投递、测评/笔试、一面、二面、三面、谈薪、get">
+        </div>
+        <div class="interview-grid" style="margin-top: 12px;">
+          <div class="field">
+            <label for="progressStageName">当前阶段名称</label>
+            <input id="progressStageName" type="text">
+          </div>
+          <div class="field">
+            <label for="progressStageStatus">阶段状态</label>
+            <select id="progressStageStatus">
+              <option value="none">未开始</option>
+              <option value="waiting">进行中 / 等反馈</option>
+              <option value="pass">通过</option>
+              <option value="fail">未通过 / 已结束</option>
+              <option value="offer">get</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top: 12px;">
+          <label for="progressStageNote">经验记录 / 复盘</label>
+          <textarea id="progressStageNote" placeholder="例如：笔试题型、面试问题、自己回答不足、下一次准备方向"></textarea>
+        </div>
+        <div class="profile-help" style="margin-top: 12px;">通过会显示为绿色；未通过会显示为温和鼓励色。无论结果如何，都建议记录经验，方便下一次准备。</div>
+      </div>
+      <footer class="modal-foot">
+        <button class="btn" id="cancelProgress" type="button">取消</button>
+        <button class="btn primary" id="saveProgress" type="button">保存进度</button>
       </footer>
     </article>
   </dialog>
@@ -1625,6 +1740,7 @@
     const TODOS_KEY = "graduateJobTodos";
     const USER_JOBS_KEY = "graduateJobUserJobs";
     const WATCHLIST_KEY = "graduateJobWatchlistFollows";
+    const PROGRESS_KEY = "graduateJobProgress";
 
     let jobs = [];
     let activeView = "home";
@@ -1635,7 +1751,9 @@
     let todos = loadObject(TODOS_KEY);
     let userJobs = loadArray(USER_JOBS_KEY).map(normalizeJob);
     let watchlist = new Set([...loadSet(WATCHLIST_KEY)].filter((id) => typeof id === "string"));
+    let progressMap = loadObject(PROGRESS_KEY);
     let selectedTodoDate = todayString();
+    let editingProgress = null;
     let addJobImageFiles = [];
     let interviewImageFiles = [];
     let tesseractLoader = null;
@@ -1823,6 +1941,8 @@
       metricApplied: document.querySelector("#metricApplied"),
       profileSummary: document.querySelector("#profileSummary"),
       homeRecommended: document.querySelector("#homeRecommended"),
+      homeProgress: document.querySelector("#homeProgress"),
+      homeWatchTips: document.querySelector("#homeWatchTips"),
       calendarMonth: document.querySelector("#calendarMonth"),
       calendarGrid: document.querySelector("#calendarGrid"),
       todoTitle: document.querySelector("#todoTitle"),
@@ -1871,6 +1991,7 @@
       modalResponsibilities: document.querySelector("#modalResponsibilities"),
       modalRequirements: document.querySelector("#modalRequirements"),
       modalMatch: document.querySelector("#modalMatch"),
+      modalProgress: document.querySelector("#modalProgress"),
       modalSalary: document.querySelector("#modalSalary"),
       modalSource: document.querySelector("#modalSource"),
       modalFavorite: document.querySelector("#modalFavorite"),
@@ -1915,7 +2036,16 @@
       todoText: document.querySelector("#todoText"),
       closeTodo: document.querySelector("#closeTodo"),
       cancelTodo: document.querySelector("#cancelTodo"),
-      saveTodo: document.querySelector("#saveTodo")
+      saveTodo: document.querySelector("#saveTodo"),
+      progressDialog: document.querySelector("#progressDialog"),
+      progressJobLabel: document.querySelector("#progressJobLabel"),
+      closeProgress: document.querySelector("#closeProgress"),
+      cancelProgress: document.querySelector("#cancelProgress"),
+      saveProgress: document.querySelector("#saveProgress"),
+      progressStages: document.querySelector("#progressStages"),
+      progressStageName: document.querySelector("#progressStageName"),
+      progressStageStatus: document.querySelector("#progressStageStatus"),
+      progressStageNote: document.querySelector("#progressStageNote")
     };
 
     const viewCopy = {
@@ -1933,6 +2063,15 @@
       "可投递": "open",
       "即将截止": "soon",
       "已截止": "closed"
+    };
+
+    const DEFAULT_PROGRESS_STAGES = ["已投递", "测评/笔试", "一面", "二面", "三面", "谈薪", "get"];
+    const PROGRESS_STATUS_TEXT = {
+      none: "未开始",
+      waiting: "进行中",
+      pass: "已通过",
+      fail: "已复盘",
+      offer: "get"
     };
 
     init();
@@ -2022,6 +2161,12 @@
       els.closeTodo.addEventListener("click", closeTodo);
       els.cancelTodo.addEventListener("click", closeTodo);
       els.saveTodo.addEventListener("click", saveTodo);
+      els.closeProgress.addEventListener("click", closeProgressDialog);
+      els.cancelProgress.addEventListener("click", closeProgressDialog);
+      els.saveProgress.addEventListener("click", saveProgressDialog);
+      els.progressDialog.addEventListener("click", (event) => {
+        if (event.target === els.progressDialog) closeProgressDialog();
+      });
       els.generateInterviewSearch.addEventListener("click", renderInterviewLinks);
       els.recognizeInterviewImages.addEventListener("click", recognizeInterviewImages);
       els.summarizeInterview.addEventListener("click", renderInterviewSummary);
@@ -2172,7 +2317,8 @@
         appliedMeta: loadObject(`${APPLIED_KEY}:meta`),
         userJobs,
         todos,
-        watchlist: [...watchlist]
+        watchlist: [...watchlist],
+        progressMap
       };
     }
 
@@ -2184,6 +2330,7 @@
       userJobs = Array.isArray(state.userJobs) ? state.userJobs.map(normalizeJob) : [];
       todos = state.todos && typeof state.todos === "object" ? state.todos : {};
       watchlist = new Set(Array.isArray(state.watchlist) ? state.watchlist : []);
+      progressMap = state.progressMap && typeof state.progressMap === "object" ? state.progressMap : {};
       localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
       localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favoriteIds]));
       localStorage.setItem(APPLIED_KEY, JSON.stringify([...appliedIds]));
@@ -2191,6 +2338,7 @@
       localStorage.setItem(USER_JOBS_KEY, JSON.stringify(userJobs));
       localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
       localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlist]));
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progressMap));
     }
 
     async function loadCloudState() {
@@ -2283,6 +2431,8 @@
       renderJobs();
       renderSavedLists();
       renderHomeRecommended();
+      renderHomeProgress();
+      renderHomeWatchTips();
       renderProfileAnalysis();
       renderMyJobs();
       renderWatchlist();
@@ -2329,6 +2479,41 @@
         ? list.map((job) => miniJobCard(job)).join("")
         : `<div class="empty">填写个人信息里的意向岗位后，这里会出现推荐岗位。</div>`;
       bindMiniCards(els.homeRecommended);
+    }
+
+    function renderHomeProgress() {
+      const list = allManageableJobs().filter((job) => isApplied(job) || hasProgress(job)).slice(0, 5);
+      els.homeProgress.innerHTML = list.length
+        ? list.map((job) => miniJobCard(job, true)).join("")
+        : `<div class="empty">标记已投递后，这里会显示企业、岗位和当前进度。</div>`;
+      bindMiniCards(els.homeProgress);
+      bindProgressButtons(els.homeProgress);
+    }
+
+    function renderHomeWatchTips() {
+      const list = publicWatchlist
+        .slice()
+        .sort((a, b) => Number(watchlist.has(b.id)) - Number(watchlist.has(a.id)))
+        .slice(0, 4);
+      els.homeWatchTips.innerHTML = list.length
+        ? list.map((item) => watchTipCard(item)).join("")
+        : `<div class="empty">待发布提醒清单正在整理中。</div>`;
+      bindWatchTodoButtons(els.homeWatchTips);
+    }
+
+    function watchTipCard(item) {
+      const tips = watchPrepareTips(item);
+      return `
+        <article class="mini-card">
+          <h4 class="clamp two">${escapeHtml(item.company)} · ${escapeHtml(item.role || "校招")}</h4>
+          <div class="muted">关注窗口：${escapeHtml(item.window || "待补充")}</div>
+          <div class="progress-note">${escapeHtml(tips[0])}</div>
+          <div class="btn-row" style="margin-top:10px;">
+            <button class="btn pink" type="button" data-watch-todo="${escapeAttr(item.id)}">加入待办</button>
+            ${item.link ? `<a class="btn" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">打开官网</a>` : ""}
+          </div>
+        </article>
+      `;
     }
 
     function renderProfileAnalysis() {
@@ -2433,16 +2618,24 @@
         : `<div class="empty">还没有标记已投递岗位。</div>`;
       bindMiniCards(els.favoriteList);
       bindMiniCards(els.appliedList);
+      bindProgressButtons(els.favoriteList);
+      bindProgressButtons(els.appliedList);
     }
 
     function miniJobCard(job, showAppliedDate = false) {
       const applied = getAppliedMeta(job);
+      const progress = getProgress(job);
+      const current = currentProgressStage(progress);
       return `
         <article class="mini-card" data-open-job="${escapeAttr(getJobKey(job))}">
           <h4 class="clamp two">${escapeHtml(job.role)}</h4>
-          <div class="muted">${escapeHtml(job.company)} · ${escapeHtml(job.city)}</div>
+          <div class="muted">${escapeHtml(job.company)} ? ${escapeHtml(job.city)}</div>
           <div class="tagline">${makeTags(job)}</div>
-          ${showAppliedDate && applied ? `<div class="muted" style="margin-top:8px;">投递日期：${escapeHtml(applied.date)}</div>` : ""}
+          ${showAppliedDate && applied ? `<div class="muted" style="margin-top:8px;">?????${escapeHtml(applied.date)}</div>` : ""}
+          ${(isApplied(job) || hasProgress(job)) ? `
+            <div class="progress-note">?????${escapeHtml(current.name)} ? ${escapeHtml(PROGRESS_STATUS_TEXT[current.status] || "???")}</div>
+            ${progressLineHtml(job)}
+          ` : ""}
         </article>
       `;
     }
@@ -2456,11 +2649,22 @@
       });
     }
 
+    function bindProgressButtons(container) {
+      container.querySelectorAll("[data-progress-job]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const job = allManageableJobs().find((item) => getJobKey(item) === button.dataset.progressJob);
+          if (job) openProgressDialog(job, Number(button.dataset.progressIndex || 0));
+        });
+      });
+    }
+
     function renderMyJobs() {
       els.myJobList.innerHTML = userJobs.length
         ? userJobs.map((job) => miniJobCard(job)).join("")
         : `<div class="empty">还没有自己新增的岗位。点击“新增岗位”，把你在其他平台看到的意向岗位保存进来。</div>`;
       bindMiniCards(els.myJobList);
+      bindProgressButtons(els.myJobList);
     }
 
     function allManageableJobs() {
@@ -2482,14 +2686,14 @@
       root.querySelectorAll("[data-favorite]").forEach((button) => {
         button.onclick = (event) => {
           event.stopPropagation();
-          const job = jobs.find((item) => getJobKey(item) === button.dataset.favorite);
+          const job = allManageableJobs().find((item) => getJobKey(item) === button.dataset.favorite);
           if (job) toggleFavorite(job);
         };
       });
       root.querySelectorAll("[data-applied]").forEach((button) => {
         button.onclick = (event) => {
           event.stopPropagation();
-          const job = jobs.find((item) => getJobKey(item) === button.dataset.applied);
+          const job = allManageableJobs().find((item) => getJobKey(item) === button.dataset.applied);
           if (job) toggleApplied(job);
         };
       });
@@ -2516,6 +2720,11 @@
         </div>
       `).join("");
       els.modalMatch.innerHTML = matchAnalysisHtml(analyzeJobMatch(job));
+      els.modalProgress.innerHTML = `
+        <div class="progress-note">点击阶段可以更新状态、记录经验。</div>
+        ${progressLineHtml(job)}
+      `;
+      bindProgressButtons(els.modalProgress);
       setList(els.modalResponsibilities, job.responsibilities);
       setList(els.modalRequirements, job.requirements);
       els.modalSalary.textContent = job.salary;
@@ -2571,6 +2780,122 @@
         .sort((a, b) => a.localeCompare(b, "zh-CN"));
     }
 
+    function hasProgress(job) {
+      const key = getJobKey(job);
+      return Boolean(progressMap[key] && Array.isArray(progressMap[key].stages));
+    }
+
+    function getProgress(job) {
+      const key = getJobKey(job);
+      const saved = progressMap[key];
+      if (saved && Array.isArray(saved.stages) && saved.stages.length) {
+        return {
+          stages: saved.stages.map((stage, index) => ({
+            name: stage.name || DEFAULT_PROGRESS_STAGES[index] || `阶段${index + 1}`,
+            status: stage.status || "none",
+            note: stage.note || "",
+            updated: stage.updated || ""
+          }))
+        };
+      }
+      return {
+        stages: DEFAULT_PROGRESS_STAGES.map((name, index) => ({
+          name,
+          status: isApplied(job) && index === 0 ? "pass" : "none",
+          note: "",
+          updated: isApplied(job) && index === 0 ? todayString() : ""
+        }))
+      };
+    }
+
+    function saveProgress(job, progress) {
+      progressMap[getJobKey(job)] = progress;
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progressMap));
+      queueCloudSave();
+    }
+
+    function ensureAppliedProgress(job) {
+      const progress = getProgress(job);
+      if (progress.stages[0]) {
+        progress.stages[0].status = "pass";
+        progress.stages[0].updated = progress.stages[0].updated || todayString();
+      }
+      saveProgress(job, progress);
+    }
+
+    function currentProgressStage(progress) {
+      const stages = progress.stages || [];
+      const active = stages.find((stage) => stage.status === "waiting");
+      if (active) return active;
+      const lastDone = stages.slice().reverse().find((stage) => stage.status && stage.status !== "none");
+      return lastDone || stages[0] || { name: "未开始", status: "none" };
+    }
+
+    function progressLineHtml(job) {
+      const key = escapeAttr(getJobKey(job));
+      const progress = getProgress(job);
+      return `
+        <div class="progress-line">
+          ${progress.stages.map((stage, index) => `
+            <button class="progress-step ${escapeAttr(stage.status || "none")}" type="button" data-progress-job="${key}" data-progress-index="${index}" title="${escapeAttr(stage.note || PROGRESS_STATUS_TEXT[stage.status] || "未开始")}">
+              ${escapeHtml(stage.name)}
+            </button>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function parseProgressStages(value) {
+      const stages = splitTokens(value);
+      return stages.length ? stages : DEFAULT_PROGRESS_STAGES.slice();
+    }
+
+    function openProgressDialog(job, index = 0) {
+      const progress = getProgress(job);
+      const safeIndex = Math.max(0, Math.min(index, progress.stages.length - 1));
+      const stage = progress.stages[safeIndex] || progress.stages[0];
+      editingProgress = { job, index: safeIndex };
+      els.progressJobLabel.textContent = `${job.company} · ${job.role}`;
+      els.progressStages.value = progress.stages.map((item) => item.name).join("、");
+      els.progressStageName.value = stage.name || "";
+      els.progressStageStatus.value = stage.status || "none";
+      els.progressStageNote.value = stage.note || "";
+      els.progressDialog.showModal();
+    }
+
+    function closeProgressDialog() {
+      editingProgress = null;
+      els.progressDialog.close();
+    }
+
+    function saveProgressDialog() {
+      if (!editingProgress) return;
+      const { job, index } = editingProgress;
+      const previous = getProgress(job);
+      const stageNames = parseProgressStages(els.progressStages.value);
+      const stages = stageNames.map((name, stageIndex) => {
+        const old = previous.stages.find((item) => item.name === name) || previous.stages[stageIndex] || {};
+        return {
+          name,
+          status: old.status || "none",
+          note: old.note || "",
+          updated: old.updated || ""
+        };
+      });
+      const safeIndex = Math.max(0, Math.min(index, stages.length - 1));
+      stages[safeIndex] = {
+        ...stages[safeIndex],
+        name: els.progressStageName.value.trim() || stages[safeIndex].name,
+        status: els.progressStageStatus.value || "none",
+        note: els.progressStageNote.value.trim(),
+        updated: todayString()
+      };
+      saveProgress(job, { stages });
+      closeProgressDialog();
+      renderAll();
+      if (els.jobDialog.open) openJob(job);
+    }
+
     function toggleFavorite(job) {
       const key = getJobKey(job);
       if (favoriteIds.has(key)) favoriteIds.delete(key);
@@ -2593,6 +2918,7 @@
         const meta = loadObject(`${APPLIED_KEY}:meta`);
         meta[key] = { date: todayString(), note: "" };
         localStorage.setItem(`${APPLIED_KEY}:meta`, JSON.stringify(meta));
+        ensureAppliedProgress(job);
       }
       saveSet(APPLIED_KEY, appliedIds);
       queueCloudSave();
@@ -3247,6 +3573,41 @@
       return cities.filter((city) => text.includes(city)).slice(0, 6).join("、");
     }
 
+    function watchPrepareTips(item) {
+      const text = `${item.company || ""} ${item.role || ""} ${item.note || ""}`.toLowerCase();
+      const tips = ["检查企业官方招聘页是否开放", "整理一版对应岗位简历", "准备自我介绍和项目复盘"];
+      if (/产品|运营|商业|市场|内容/.test(text)) tips.push("准备1个产品/运营/增长案例");
+      if (/算法|研发|技术|java|前端|后端|测试|数据|ai/.test(text)) tips.push("复习笔试题、项目技术细节和基础八股");
+      if (/设计|游戏|视觉|交互/.test(text)) tips.push("整理作品集链接和项目说明");
+      if (/银行|国企|电网|央企|管培|职能/.test(text)) tips.push("准备行测、企业认知和结构化面试表达");
+      return tips.slice(0, 4);
+    }
+
+    function bindWatchTodoButtons(container) {
+      container.querySelectorAll("[data-watch-todo]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          addWatchTodo(button.dataset.watchTodo);
+        });
+      });
+    }
+
+    function addWatchTodo(id) {
+      const item = publicWatchlist.find((entry) => entry.id === id);
+      if (!item) return;
+      const date = selectedTodoDate || todayString();
+      todos[date] = todos[date] || [];
+      const tasks = [
+        `检查 ${item.company} 官方招聘页（关注窗口：${item.window || "待补充"}）`,
+        `${item.company} 准备：${watchPrepareTips(item)[0]}`
+      ];
+      tasks.forEach((text) => {
+        if (!todos[date].some((todo) => todo.text === text)) todos[date].push({ text, done: false });
+      });
+      saveTodos();
+      renderAll();
+    }
+
     function renderWatchlist() {
       els.watchFollowCount.textContent = `已关注 ${watchlist.size} 个`;
       els.watchList.innerHTML = publicWatchlist.length
@@ -3269,6 +3630,7 @@
             <div class="btn-row" style="margin-top:10px;">
               ${item.link ? `<a class="btn primary" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer">打开官网</a>` : ""}
               <button class="btn" type="button" data-interview-company="${escapeAttr(item.company)}" data-interview-role="${escapeAttr(item.role)}">查面试情报</button>
+              <button class="btn pink" type="button" data-watch-todo="${escapeAttr(item.id)}">&#21152;&#20837;&#24453;&#21150;</button>
             </div>
           </article>
         `;
@@ -3277,6 +3639,7 @@
       els.watchList.querySelectorAll("[data-watch-toggle]").forEach((button) => {
         button.addEventListener("click", () => toggleWatchFollow(button.dataset.watchToggle));
       });
+      bindWatchTodoButtons(els.watchList);
       els.watchList.querySelectorAll("[data-interview-company]").forEach((button) => {
         button.addEventListener("click", () => {
           activeView = "interview";
