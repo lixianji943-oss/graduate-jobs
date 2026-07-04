@@ -462,18 +462,46 @@
     .calendar-tools {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
       justify-content: flex-end;
     }
 
     .calendar-tools select {
+      width: auto;
+      min-width: 0;
+      height: 34px;
       min-height: 34px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 4px 8px;
+      border: 0;
+      border-radius: 999px;
+      padding: 4px 28px 4px 10px;
       background: #fffdf8;
       font-weight: 800;
+    }
+
+    #calendarYear {
+      color: var(--black);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    #calendarMonthSelect {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    #calendarMonth {
+      display: none;
+    }
+
+    .calendar-tools .btn {
+      width: 34px;
+      min-height: 34px;
+      padding: 0;
+      border-radius: 999px;
+      font-size: 18px;
+      line-height: 1;
     }
 
     .mini-card {
@@ -938,6 +966,13 @@
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 8px;
+    }
+
+    .weekday {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-align: center;
     }
 
     .day {
@@ -3817,23 +3852,26 @@
       const year = calendarCursor.getFullYear();
       const month = calendarCursor.getMonth();
       renderCalendarSelectors(year, month);
-      els.calendarMonth.textContent = `${year}?${month + 1}?`;
+      els.calendarMonth.textContent = `${year}\u5e74${month + 1}\u6708`;
       const first = new Date(year, month, 1);
       const startDay = first.getDay();
       const days = new Date(year, month + 1, 0).getDate();
-      const cells = [];
+      const weekdays = ["\u65e5", "\u4e00", "\u4e8c", "\u4e09", "\u56db", "\u4e94", "\u516d"];
+      const cells = weekdays.map((name) => ({ type: "weekday", name }));
       for (let i = 0; i < startDay; i += 1) cells.push("");
       for (let day = 1; day <= days; day += 1) {
         const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        cells.push(date);
+        cells.push({ type: "date", date });
       }
       els.calendarGrid.innerHTML = cells.map((date) => {
         if (!date) return `<div></div>`;
-        const dayTodos = todos[date] || [];
+        if (date.type === "weekday") return `<div class="weekday">${date.name}</div>`;
+        const dayValue = date.date;
+        const dayTodos = todos[dayValue] || [];
         return `
-          <button class="day ${date === todayString() ? "today" : ""}" type="button" data-date="${date}">
+          <button class="day ${dayValue === todayString() ? "today" : ""}" type="button" data-date="${dayValue}">
             <div class="day-num">
-              <span class="day-date">${Number(date.slice(-2))}</span>
+              <span class="day-date">${Number(dayValue.slice(-2))}</span>
               <span class="day-slash">/</span>
               <span class="day-count">${dayTodos.length}</span>
             </div>
@@ -3867,7 +3905,7 @@
         for (let value = 0; value < 12; value += 1) {
           const option = document.createElement("option");
           option.value = String(value);
-          option.textContent = `${value + 1}?`;
+          option.textContent = `${value + 1}\u6708`;
           els.calendarMonthSelect.appendChild(option);
         }
       }
